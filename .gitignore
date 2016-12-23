@@ -8,3 +8,4 @@ isodir/
 **/*.a
 .cproject
 .project
+.settings/
