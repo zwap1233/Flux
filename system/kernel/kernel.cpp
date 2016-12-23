@@ -3,10 +3,16 @@
 
 extern "C" {
 
+	/**
+	 * Early init point for kernel, is called by boot.S before the global constructors are initialized
+	 */
 	void initKernel(void){
 
 	}
 
+	/**
+	 * Starting point for the kernel
+	 */
 	void mainKernel(void) {
 		driver_vga::vga_initialize();
 		printf("Hello, kernel World!\n");
@@ -42,7 +48,7 @@ namespace __cxxabiv1 {
 	}
 }
 
-/*
+/**
  * virtual backup definition
  * is used by the compiler as the definition for a virtual function that is nowhere implemented
  */
