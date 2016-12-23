@@ -1,0 +1,10 @@
+\.git/
+sysroot/
+isodir/
+**/*.iso
+**/*.bin
+**/*.o
+**/*.d
+**/*.a
+.cproject
+.project
