@@ -1,7 +1,13 @@
 #include <stdio.h>
 #include <kernel/drivers/vga.h>
 
+extern uint32_t ld_kernel_start;
+
 extern "C" {
+
+	void initKernel(void);
+	void mainKernel(void);
+
 
 	/**
 	 * Early init point for kernel, is called by boot.S before the global constructors are initialized
@@ -16,7 +22,6 @@ extern "C" {
 	void mainKernel(void) {
 		driver_vga::vga_initialize();
 		printf("Hello, kernel World!\n");
-		printf("How are you doing?!\n");
 	}
 
 }
@@ -53,5 +58,5 @@ namespace __cxxabiv1 {
  * is used by the compiler as the definition for a virtual function that is nowhere implemented
  */
 extern "C" void __cxa_pure_virtual(){
-    // Do nothing or print an error message.
+    printf("ERROR: virtual function is called\n");
 }

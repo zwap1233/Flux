@@ -22,7 +22,7 @@ WARNINGS:= 	-Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align \
             -Wredundant-decls -Winline -Wno-long-long \
             -Wuninitialized -Wconversion
 
-C_ONLY_FLAGS=-std=c99
+C_ONLY_FLAGS:=-std=c99
 CFLAGS:=$(CFLAGS) -ffreestanding $(WARNINGS) $(KERNEL_ARCH_CFLAGS)
 CPPFLAGS:=$(CPPFLAGS) -D__is_kernel -Iinclude $(KERNEL_ARCH_CPPFLAGS)
 LDFLAGS:=$(LDFLAGS) $(KERNEL_ARCH_LDFLAGS)
