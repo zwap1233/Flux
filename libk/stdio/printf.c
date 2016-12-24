@@ -1,8 +1,8 @@
 #include <limits.h>
 #include <stdarg.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-#include <stdint.h>
 
 static int print(const char* data, size_t length) {
 	const unsigned char* bytes = (const unsigned char*) data;

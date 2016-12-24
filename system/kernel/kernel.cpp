@@ -1,5 +1,5 @@
-#include <stdio.h>
 #include <kernel/drivers/vga.h>
+#include <stdio.h>
 
 extern uint32_t ld_kernel_start;
 

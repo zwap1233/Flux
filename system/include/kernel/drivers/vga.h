@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+
 #include <string.h>
 
 namespace driver_vga {
