@@ -17,6 +17,12 @@ export INCLUDEDIR=$PREFIX/include
 export CFLAGS='-O2 -g'
 export CPPFLAGS='-fno-exceptions -fno-rtti'
 
+#inbuild vars
+export OSNAME=FluxOS
+export KERNFILE=$OSNAME.bin
+export ISODIR=isodir
+export ISOFILE=$OSNAME.iso
+
 # Configure the cross-compiler to use the desired system root.
 export SYSROOT="$(pwd)sysroot"
 export CC="$CC --sysroot=$SYSROOT"

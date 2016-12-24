@@ -6,6 +6,6 @@ for PROJECT in $PROJECTS; do
   (cd $PROJECT && $MAKE clean)
 done
 
-rm -rf sysroot
-rm -rf isodir
-rm -rf NoletOS.iso
+rm -rf $SYSROOT
+rm -rf $ISODIR
+rm -rf $ISOFILE

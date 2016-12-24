@@ -2,18 +2,14 @@
 set -e
 . ./build.sh
 
-mkdir -p isodir
-mkdir -p isodir/boot
-mkdir -p isodir/boot/grub
+mkdir -p $ISODIR
+mkdir -p $ISODIR/boot
+mkdir -p $ISODIR/boot/grub
 
-KERNFILE=$1
-OSNAME=$2
-ISO=$3
-
-cp sysroot/boot/NoletOS.bin isodir/boot/NoletOS.bin
-cat > isodir/boot/grub/grub.cfg << EOF
-menuentry "NoletOS" {
-	multiboot /boot/NoletOS.bin
+cp $SYSROOT/boot/$KERNFILE $ISODIR/boot/$KERNFILE
+cat > $ISODIR/boot/grub/grub.cfg << EOF
+menuentry "$OSNAME" {
+	multiboot /boot/$KERNFILE
 }
 EOF
-grub-mkrescue -o NoletOS.iso isodir
+grub-mkrescue -o $ISOFILE $ISODIR

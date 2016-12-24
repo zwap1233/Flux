@@ -17,12 +17,18 @@ ARCHDIR=arch/$(HOSTARCH)
 
 include $(ARCHDIR)/make.config
 
-CFLAGS:=$(CFLAGS) -ffreestanding -Wall -Wextra $(KERNEL_ARCH_CFLAGS)
+WARNINGS:= 	-Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align \
+            -Wwrite-strings -Wmissing-declarations \
+            -Wredundant-decls -Winline -Wno-long-long \
+            -Wuninitialized -Wconversion
+
+C_ONLY_FLAGS=-std=c99
+CFLAGS:=$(CFLAGS) -ffreestanding $(WARNINGS) $(KERNEL_ARCH_CFLAGS)
 CPPFLAGS:=$(CPPFLAGS) -D__is_kernel -Iinclude $(KERNEL_ARCH_CPPFLAGS)
 LDFLAGS:=$(LDFLAGS) $(KERNEL_ARCH_LDFLAGS)
 LIBS:=$(LIBS) -nostdlib -lk -lgcc $(KERNEL_ARCH_LIBS)
 
-KERNFILE?=NoletOS.bin
+KERNFILE?=FluxOS.bin
 #Backup for linker, should be set in arch .config file
 LINKER?=linker.ld
 
@@ -53,13 +59,12 @@ all: $(KERNFILE)
 
 $(KERNFILE): $(OBJS) $(ARCHDIR)/$(LINKER)
 	$(CC) -T $(ARCHDIR)/$(LINKER) -o $@ $(CFLAGS) $(LINK_LIST)
-	@grub-file --is-x86-multiboot $(KERNFILE)
 
 $(ARCHDIR)/crtbegin.o $(ARCHDIR)/crtend.o:
 	@OBJ=`$(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=$(@F)` && cp "$$OBJ" $@
 
 .c.o:
-	$(CC) -MD -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
+	$(CC) -MD -c $< -o $@ $(CFLAGS) $(CPPFLAGS) $(C_ONLY_FLAGS)
 
 .cpp.o:
 	$(CC) -MD -c $< -o $@ $(CFLAGS) $(CPPFLAGS)

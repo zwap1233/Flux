@@ -2,7 +2,7 @@ DEFAULT_HOST!=../default-host.sh
 HOST?=$(DEFAULT_HOST)
 HOSTARCH!=../target-triplet-to-arch.sh $(HOST)
 
-CFLAGS?=-O2 -g
+CFLAGS?=-O2 -g -std=c99
 CPPFLAGS?=
 LDFLAGS?=
 LIBS?=
@@ -17,7 +17,12 @@ ARCHDIR=arch/$(HOSTARCH)
 
 include $(ARCHDIR)/make.config
 
-CFLAGS:=$(CFLAGS) -ffreestanding -Wall -Wextra $(ARCH_CFLAGS)
+WARNINGS:= 	-Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align \
+            -Wwrite-strings -Wmissing-declarations \
+            -Wredundant-decls -Winline -Wno-long-long \
+            -Wuninitialized -Wconversion
+
+CFLAGS:=$(CFLAGS) -ffreestanding $(WARNINGS) $(ARCH_CFLAGS)
 CPPFLAGS:=$(CPPFLAGS) -D__is_libc -Iinclude $(ARCH_CPPFLAGS)
 LIBK_CFLAGS:=$(CFLAGS) $(KERNEL_ARCH_CFLAGS)
 LIBK_CPPFLAGS:=$(CPPFLAGS) -D__is_libk $(KERNEL_ARCH_CPPFLAGS)
@@ -49,7 +54,7 @@ libk.a: $(LIBK_OBJS)
 	$(AR) rcs $@ $(LIBK_OBJS)
 
 .c.o:
-	$(CC) -MD -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
+	$(CC) -MD -c $< -o $@ $(CFLAGS) $(CPPFLAGS) -std=c99
 
 .c.S:
 	$(CC) -MD -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
