@@ -22,6 +22,7 @@ extern "C" {
 	void mainKernel(void) {
 		driver_vga::vga_initialize();
 		printf("Hello, kernel World!\n");
+		printf("%x", ld_kernel_start);
 	}
 
 }

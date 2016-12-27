@@ -9,3 +9,5 @@ isodir/
 .cproject
 .project
 .settings/
+.q
+.gdbinit

@@ -1,5 +1,6 @@
 #!/bin/sh
 set -e
-. ./iso.sh
+. ./clean.sh
+. ./build.sh
 
-qemu-system-$(./target-triplet-to-arch.sh $HOST) -cdrom $ISOFILE
+qemu-system-$(./target-triplet-to-arch.sh $HOST) -kernel system/$KERNFILE
