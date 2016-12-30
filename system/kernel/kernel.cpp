@@ -1,7 +1,8 @@
-#include <kernel/drivers/vga.h>
+#include <kernel/shell.h>
 #include <stdio.h>
 
 extern uint32_t ld_kernel_start;
+extern uint32_t ld_kernel_end;
 
 extern "C" {
 
@@ -20,9 +21,10 @@ extern "C" {
 	 * Starting point for the kernel
 	 */
 	void mainKernel(void) {
-		driver_vga::vga_initialize();
+		shell::initialize();
 		printf("Hello, kernel World!\n");
-		printf("%x", ld_kernel_start);
+		printf("%x\n", (uint32_t) &ld_kernel_start);
+		printf("%x\n", (uint32_t) &ld_kernel_end);
 	}
 
 }
