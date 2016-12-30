@@ -6,19 +6,31 @@
  */
 
 #include <kernel/shell.h>
+#include <stdio.h>
 
 using namespace shell;
 
 /**
  * Initialize the shell should be called only once by the kernel after the global constructors
  */
-void shell::initialize() {
+void shell::initialize(uint32_t *kernel_start, uint32_t *kernel_end) {
 	for (size_t y = 0; y < VGA_HEIGHT; y++) {
 		for (size_t x = 0; x < VGA_WIDTH; x++) {
 			const size_t index = y * VGA_WIDTH + x;
 			vga_buffer[index] = vga_entry(' ', vga_entry_color(foregroundcolor, backgroundcolor));
 		}
 	}
+
+	setForegroundColor(VGA_COLOR_LIGHT_GREEN);
+	writestring("FluxOS version 0.0.1");
+
+	shell_x = 0;
+	shell_y = VGA_HEIGHT - 1;
+	printf("Start: %x                   End: %x", kernel_start, kernel_end);
+
+	vga_buffer = (uint16_t *) VGA_MEMORY + VGA_WIDTH;
+	setCursor(0,0);
+	setForegroundColor(VGA_COLOR_LIGHT_GREY);
 }
 
 /**
@@ -56,17 +68,17 @@ void shell::putchar(char c) {
 	unsigned char uc = (unsigned char) c;
 
 	if(c != '\n' && c != '\r' && c != '\0'){
+		putentryat(uc, foregroundcolor, backgroundcolor, shell_x, shell_y);
+
 		if((shell_x++) >= SHELL_WIDTH){
 			shell_x = 0;
-			if((shell_y++) >= SHELL_HEIGHT){
+			if((shell_y++) >= (SHELL_HEIGHT - 1)){
 				scroll(1);
 			}
 		}
-
-		putentryat(uc, foregroundcolor, backgroundcolor, shell_x, shell_y);
 	} else if(c == '\n' || c == '\r'){
 		shell_x = 0;
-		if((shell_y++) >= SHELL_HEIGHT){
+		if((shell_y++) >= (SHELL_HEIGHT - 1)){
 			scroll(1);
 		}
 	}
@@ -101,6 +113,7 @@ void shell::writestring(const char* data) {
  */
 void shell::scroll(size_t rows){
 	//TODO: write shell::scroll function body
+	shell_y = 0;
 }
 
 /**
