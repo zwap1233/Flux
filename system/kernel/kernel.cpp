@@ -4,10 +4,16 @@
 extern uint32_t ld_kernel_start;
 extern uint32_t ld_kernel_end;
 
+volatile uint32_t pagedir[1024] __attribute__((aligned(4096)));
+volatile uint32_t pagetable[1024] __attribute__((aligned(4096)));
+
 extern "C" {
 
 	void initKernel(void);
 	void mainKernel(void);
+
+	extern void loadPageDirectory(unsigned int*);
+	extern void enablePaging();
 
 
 	/**
@@ -21,8 +27,26 @@ extern "C" {
 	 * Starting point for the kernel
 	 */
 	void mainKernel(void) {
+
+		for(int i = 0; i < 1024; i++){
+			pagedir[i] = 0x00000002;
+		}
+
+		//we will fill all 1024 entries in the table, mapping 4 megabytes
+		for(int i = 0; i < 1024; i++){
+		    // As the address is page aligned, it will always leave 12 bits zeroed.
+		    // Those bits are used by the attributes ;)
+			pagetable[i] = (i * 0x1000) | 3; // attributes: supervisor level, read/write, present.
+		}
+
+		pagedir[0] = (unsigned int) pagetable | 3;
+
+		loadPageDirectory((unsigned int *) pagedir);
+		enablePaging();
+
 		shell::initialize(&ld_kernel_start, &ld_kernel_end);
 		printf("Hello, kernel World!\n");
+		printf("%x\n", &pagedir);
 	}
 }
 
