@@ -5,6 +5,8 @@
  *      Author: wouter
  */
 
+#include <kernel/memory/Paging.h>
+
 using namespace Mem_Paging;
 
 /**

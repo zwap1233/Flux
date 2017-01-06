@@ -1,5 +1,6 @@
 #include <kernel/shell.h>
 #include <stdio.h>
+#include <stdint.h>
 
 extern uint32_t ld_kernel_start;
 extern uint32_t ld_kernel_end;
