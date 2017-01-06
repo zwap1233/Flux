@@ -26,7 +26,7 @@ void shell::initialize(uint32_t *kernel_start, uint32_t *kernel_end) {
 
 	shell_x = 0;
 	shell_y = VGA_HEIGHT - 1;
-	printf("Start: %x                   End: %x", kernel_start, kernel_end);
+	printf("Start: 0x%x                   End: 0x%x", kernel_start, kernel_end);
 
 	vga_buffer = (uint16_t *) VGA_MEMORY + VGA_WIDTH;
 	setCursor(0,0);

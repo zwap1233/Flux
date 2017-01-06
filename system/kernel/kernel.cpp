@@ -29,8 +29,8 @@ extern "C" {
 	void mainKernel(void) {
 		shell::initialize(&ld_kernel_start, &ld_kernel_end);
 		printf("Hello, kernel World!\n");
-		printf("%x\n", &boot_pagedir);
-		printf("%x\n", &boot_pagetab1);
+		printf("0x%x\n", &boot_pagedir);
+		printf("0x%x\n", &boot_pagetab1);
 	}
 }
 

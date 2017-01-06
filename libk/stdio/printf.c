@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <string.h>
 
+char *convert(unsigned int num, int base);
+
 static int print(const char* data, size_t length) {
 	const unsigned char* bytes = (const unsigned char*) data;
 	for (size_t i = 0; i < length; i++)
@@ -63,31 +65,46 @@ int printf(const char* format, ...) {
 			written += len;
 		} else if (*format == 'x') {
 			format++;
-			uint32_t hex = va_arg(parameters, uint32_t);
-			if (maxrem < 10) {
+			unsigned int hex = va_arg(parameters, unsigned int);
+			const char *str = convert(hex, 16);
+			int len = strlen(str);
+			if (maxrem < len) {
 				// TODO: Set errno to EOVERFLOW.
 				return -1;
 			}
 
-			char str[10];
-			str[0] = '0';
-			str[1] = 'x';
-
-			//uint32_t mask = 0xf0000000;
-			int i = 0;
-			for(i = 0; i < 8; i++){
-				uint8_t res = (uint8_t) ((hex >> ((7 - i)*4)) & 0xf);
-
-				if(res > 9){
-					str[i + 2] = (char) ((res - 10) + (uint8_t) 'a');
-				} else {
-					str[i + 2] = (char) (res + (uint8_t) '0');
-				}
+			if (!print(str, len)){
+				return -1;
+			}
+			written += len;
+		} else if (*format == 'd') {
+			format++;
+			unsigned int dec = va_arg(parameters, unsigned int);
+			const char *str = convert(dec, 10);
+			int len = strlen(str);
+			if (maxrem < len) {
+				// TODO: Set errno to EOVERFLOW.
+				return -1;
 			}
 
-			print(str, 10);
+			if (!print(str, len)){
+				return -1;
+			}
+			written += len;
+		} else if (*format == 'B') {
+			format++;
+			unsigned int bin = va_arg(parameters, unsigned int);
+			const char *str = convert(bin, 2);
+			int len = strlen(str);
+			if (maxrem < len) {
+				// TODO: Set errno to EOVERFLOW.
+				return -1;
+			}
 
-			written += 10;
+			if (!print(str, len)){
+				return -1;
+			}
+			written += len;
 		} else {
 			format = format_begun_at;
 			size_t len = strlen(format);
@@ -104,4 +121,21 @@ int printf(const char* format, ...) {
 
 	va_end(parameters);
 	return written;
+}
+
+char *convert(unsigned int num, int base) {
+    static char Representation[]= "0123456789ABCDEF";
+    static char buffer[50];
+    char *ptr;
+
+    ptr = &buffer[49];
+    *ptr = '\0';
+
+    do
+    {
+        *--ptr = Representation[num%base];
+        num /= base;
+    }while(num != 0);
+
+    return(ptr);
 }
