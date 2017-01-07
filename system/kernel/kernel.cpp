@@ -1,6 +1,7 @@
 #include <kernel/shell.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <kernel/memory/Paging.h>
 
 extern uint32_t ld_kernel_start;
 extern uint32_t ld_kernel_end;
@@ -21,7 +22,6 @@ extern "C" {
 	 * Early init point for kernel, is called by boot.S before the global constructors are initialized
 	 */
 	void initKernel(void){
-
 	}
 
 	/**
