@@ -11,3 +11,4 @@ isodir/
 .settings/
 .q
 .gdbinit
+.~*

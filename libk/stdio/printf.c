@@ -67,7 +67,7 @@ int printf(const char* format, ...) {
 			format++;
 			unsigned int hex = va_arg(parameters, unsigned int);
 			const char *str = convert(hex, 16);
-			int len = strlen(str);
+			size_t len = strlen(str);
 			if (maxrem < len) {
 				// TODO: Set errno to EOVERFLOW.
 				return -1;
@@ -81,7 +81,7 @@ int printf(const char* format, ...) {
 			format++;
 			unsigned int dec = va_arg(parameters, unsigned int);
 			const char *str = convert(dec, 10);
-			int len = strlen(str);
+			size_t len = strlen(str);
 			if (maxrem < len) {
 				// TODO: Set errno to EOVERFLOW.
 				return -1;
@@ -95,7 +95,7 @@ int printf(const char* format, ...) {
 			format++;
 			unsigned int bin = va_arg(parameters, unsigned int);
 			const char *str = convert(bin, 2);
-			int len = strlen(str);
+			size_t len = strlen(str);
 			if (maxrem < len) {
 				// TODO: Set errno to EOVERFLOW.
 				return -1;

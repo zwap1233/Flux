@@ -6,9 +6,6 @@
 extern uint32_t ld_kernel_start;
 extern uint32_t ld_kernel_end;
 
-extern uint32_t *boot_pagedir;
-extern uint32_t *boot_pagetab1;
-
 extern "C" {
 
 	void initKernel(void);
@@ -30,8 +27,6 @@ extern "C" {
 	void mainKernel(void) {
 		shell::initialize(&ld_kernel_start, &ld_kernel_end);
 		printf("Hello, kernel World!\n");
-		printf("0x%x\n", &boot_pagedir);
-		printf("0x%x\n", &boot_pagetab1);
 	}
 }
 

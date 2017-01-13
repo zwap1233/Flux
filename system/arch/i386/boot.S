@@ -23,10 +23,10 @@ stack_top:
 .section .bss, "aw", @nobits
 .align 4096
 .globl boot_pagedir
-.globl boot_pagetab1
+.globl boot_pagetabel
 boot_pagedir:
 	.skip 4096
-boot_pagetab1:
+boot_pagetabel:
 	.skip 4096
 
 # The kernel entry point.
@@ -39,7 +39,7 @@ _start:
 	# TODO: I recall seeing some assembly that used a macro to do the
 	#       conversions to and from physical. Maybe this should be done in this
 	#       code as well?
-	movl $(boot_pagetab1 - 0xC0000000), %edi
+	movl $(boot_pagetabel - 0xC0000000), %edi
 	# First address to map is address 0.
 	# TODO: Start at the first kernel page instead. Alternatively map the first
 	#       1 MiB as it can be generally useful, and there's no need to
@@ -71,7 +71,7 @@ _start:
 
 3:
 	# Map VGA video memory to 0xC03FF000 as "present, writable".
-	movl $(0x000B8000 | 0x003), boot_pagetab1 - 0xC0000000 + 1023 * 4
+	movl $(0x000B8000 | 0x003), boot_pagetabel - 0xC0000000 + 1023 * 4
 
 	# The page table is used at both page directory entry 0 (virtually from 0x0
 	# to 0x3FFFFF) (thus identity mapping the kernel) and page directory entry
@@ -81,8 +81,8 @@ _start:
 	# would instead page fault if there was no identity mapping.
 
 	# Map the page table to both virtual addresses 0x00000000 and 0xC0000000.
-	movl $(boot_pagetab1 - 0xC0000000 + 0x003), boot_pagedir - 0xC0000000 + 0
-	movl $(boot_pagetab1 - 0xC0000000 + 0x003), boot_pagedir - 0xC0000000 + 768 * 4
+	movl $(boot_pagetabel - 0xC0000000 + 0x003), boot_pagedir - 0xC0000000 + 0
+	movl $(boot_pagetabel - 0xC0000000 + 0x003), boot_pagedir - 0xC0000000 + 768 * 4
 
 	# Set cr3 to the address of the boot_page_directory.
 	movl $(boot_pagedir - 0xC0000000), %ecx
