@@ -46,9 +46,13 @@ _start:
 	# set the page pointer table third index to the page dir
 	# to map from 0xC0000000 the page dir must be mapped to the third entry in the page pointer table
 	leal (pagedir), %esi
-	orl $(0x3), %esi
 	movl %esi, (pagepointer + 24)
 	movl $0x3, (pagepointer + 28)
+
+	# temporarily identity map the first dir
+	movl %esi, (pagepointer)
+	movl $0x3, (pagepointer + 4)
+
 
 	# Fill page dir
 	# to map one MiB two page tables are needed, last entrys are mapped to the page dirs themself so are not used
@@ -66,13 +70,6 @@ _start:
 
 	leal pagepointer, %esi
 	movl $(pagedir + 8*507), %edi
-	movl %esi, %edi
-	addl $4, %edi
-	movl $(0x03), %edi
-
-	# temporarily identity map the first dir
-	leal pagepointer, %esi
-	movl $(pagedir), %edi
 	movl %esi, %edi
 	addl $4, %edi
 	movl $(0x03), %edi
@@ -104,10 +101,9 @@ _start:
 	incl %ecx
 	cmp $1023, %ecx
 	jl 1b
-
 	# seperate mapping for vga buffer
-	movl $(VGA_BUF), pagetabel - 0xC0000000 + 1023 * 8
-	movl $(0x3), pagetabel - 0xC0000000 + 1023 * 8 + 4
+	movl $(VGA_BUF), pagetabel + 1023 * 8
+	movl $(0x3), pagetabel + 1023 * 8 + 4
 
 	leal (pagepointer), %edi
 	movl %edi, %cr3
@@ -115,6 +111,10 @@ _start:
 	movl %cr0, %ecx
 	orl $0x80010000, %ecx
 	movl %ecx, %cr0
+
+	# unmap identity paging
+	movl $0, pagepointer
+	movl $0, pagepointer + 4
 
 	lea 2f, %ecx
 	jmp *%ecx
