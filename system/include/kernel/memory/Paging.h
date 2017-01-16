@@ -8,15 +8,15 @@
 #include <stdio.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <kernel/types.h>
 
 namespace Mem_Paging {
 
-	const uint32_t virt_adr_kernel = 0xC0100000;
+	const addr_t virt_adr_kernel = 0xC0100000;
 
 	void initPaging();
 
-	uint32_t conv_phys_to_virt(uint32_t phys);
-	uint32_t conv_virt_to_phys(uint32_t virt);
+	void *getPhysicalAddress(addr_t virt);
 }
 
 

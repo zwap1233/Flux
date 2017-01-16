@@ -20,12 +20,12 @@ stack_bottom:
 stack_top:
 
 # Reserve space for the page directory and first page table
-.section .bss, "aw", @nobits
+.section .data
 .align 4096
 .globl boot_pagedir
 .globl boot_pagetabel
 boot_pagedir:
-	.skip 4096
+	.skip 4096, 0
 boot_pagetabel:
 	.skip 4096
 

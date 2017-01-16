@@ -24,7 +24,7 @@ stack_top:
 # Reserve space for the page directory and first page table
 .section .bss, "aw", @nobits
 .align 4096
-.globl pagedir1
+.globl pagedir
 .globl pagetabel
 .globl pagetabel1
 .globl pagepointer
@@ -46,11 +46,11 @@ _start:
 	# set the page pointer table third index to the page dir
 	# to map from 0xC0000000 the page dir must be mapped to the third entry in the page pointer table
 	movl $(pagedir - 0xC0000000), (pagepointer - 0xC0000000 + 24)
-	movl $0x3, (pagepointer - 0xC0000000 + 28)
+	movl $0x0, (pagepointer - 0xC0000000 + 28)
 
 	# temporarily identity map the first dir
 	movl $(pagedir - 0xC0000000), (pagepointer - 0xC0000000)
-	movl $0x3, (pagepointer - 0xC0000000 + 4)
+	movl $0x0, (pagepointer - 0xC0000000 + 4)
 
 
 	# Fill page dir

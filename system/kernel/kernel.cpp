@@ -25,6 +25,7 @@ extern "C" {
 	 * Starting point for the kernel
 	 */
 	void mainKernel(void) {
+		Mem_Paging::initPaging();
 		shell::initialize(&ld_kernel_start, &ld_kernel_end);
 		printf("Hello, kernel World!\n");
 	}
