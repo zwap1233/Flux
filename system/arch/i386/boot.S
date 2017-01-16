@@ -49,19 +49,12 @@ _start:
 	movl $1023, %ecx
 
 1:
-	# Only map the kernel.
-	cmpl $(ld_kernel_start - 0xC0000000), %esi
-	jl 2f
-	cmpl $(ld_kernel_end - 0xC0000000), %esi
-	jge 3f
-
 	# Map physical address as "present, writable". Note that this maps
 	# .text and .rodata as writable. Mind security and map them as non-writable.
 	movl %esi, %edx
 	orl $0x003, %edx
 	movl %edx, (%edi)
 
-2:
 	# Size of page is 4096 bytes.
 	addl $4096, %esi
 	# Size of entries in boot_pagetab1 is 4 bytes.
@@ -69,7 +62,7 @@ _start:
 	# Loop to the next entry if we haven't finished.
 	loop 1b
 
-3:
+2:
 	# Map VGA video memory to 0xC03FF000 as "present, writable".
 	movl $(0x000B8000 | 0x003), boot_pagetabel - 0xC0000000 + 1023 * 4
 
@@ -94,10 +87,10 @@ _start:
 	movl %ecx, %cr0
 
 	# Jump to higher half with an absolute jump.
-	lea 4f, %ecx
+	lea 3f, %ecx
 	jmp *%ecx
 
-4:
+3:
 	# At this point, paging is fully set up and enabled.
 
 	# Unmap the identity mapping as it is now unnecessary.
@@ -120,7 +113,6 @@ _start:
 
 	# Hang if kernel_main unexpectedly returns.
 	cli
-5:	hlt
-	jmp 5b
+4:	hlt
+	jmp 4b
 .size _start, . - _start
-

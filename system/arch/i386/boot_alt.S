@@ -45,45 +45,31 @@ _start:
 
 	# set the page pointer table third index to the page dir
 	# to map from 0xC0000000 the page dir must be mapped to the third entry in the page pointer table
-	leal (pagedir), %esi
-	movl %esi, (pagepointer + 24)
-	movl $0x3, (pagepointer + 28)
+	movl $(pagedir - 0xC0000000), (pagepointer - 0xC0000000 + 24)
+	movl $0x3, (pagepointer - 0xC0000000 + 28)
 
 	# temporarily identity map the first dir
-	movl %esi, (pagepointer)
-	movl $0x3, (pagepointer + 4)
+	movl $(pagedir - 0xC0000000), (pagepointer - 0xC0000000)
+	movl $0x3, (pagepointer - 0xC0000000 + 4)
 
 
 	# Fill page dir
 	# to map one MiB two page tables are needed, last entrys are mapped to the page dirs themself so are not used
-	leal pagetabel, %esi
-	leal pagedir, %edi
-	movl %esi, %edi
-	addl $4, %edi
-	movl $(0x03), %edi
+	movl $(pagetabel - 0xC0000000), (pagedir - 0xC0000000)
+	movl $(0x03), (pagedir - 0xC0000000 + 4)
 
-	leal pagetabel1, %esi
-	addl $4, %edi
-	movl %esi, %edi
-	addl $4, %edi
-	movl $(0x03), %edi
+	movl $(pagetabel1 - 0xC0000000), (pagedir - 0xC0000000 + 8)
+	movl $(0x03), (pagedir - 0xC0000000 + 12)
 
-	leal pagepointer, %esi
-	movl $(pagedir + 8*507), %edi
-	movl %esi, %edi
-	addl $4, %edi
-	movl $(0x03), %edi
+	movl $(pagepointer - 0xC0000000), (pagedir - 0xC0000000 + 8*507)
+	movl $(0x03), (pagedir - 0xC0000000 + 8*507 + 4)
 
 	# second and third pagedirs still have to be mapped here
-
-	leal pagedir, %esi
-	movl $(pagedir + 8*511), %edi
-	movl %esi, %edi
-	addl $4, %edi
-	movl $(0x03), %edi
+	movl $(pagedir - 0xC0000000), (pagedir - 0xC0000000 + 8*511)
+	movl $(0x03), (pagedir - 0xC0000000 + 8*511 + 4)
 
 	# start filling pagetable at address 0
-	movl $0, %ecx
+	movl $1023, %ecx
 	# map physical address 0 to virtual address 0xC0000000
 	movl $0, %esi
 	movl $0xC0000000, %edi
@@ -98,27 +84,29 @@ _start:
 	addl $4, %edi
 
 	# this will run through both page tables at the same time, so they have to be following each other
-	incl %ecx
-	cmp $1023, %ecx
-	jl 1b
-	# seperate mapping for vga buffer
-	movl $(VGA_BUF), pagetabel + 1023 * 8
-	movl $(0x3), pagetabel + 1023 * 8 + 4
+	loop 1b
 
-	leal (pagepointer), %edi
-	movl %edi, %cr3
+	# seperate mapping for vga buffer
+	movl $(VGA_BUF), (pagetabel - 0xC0000000 + 1023 * 8)
+	movl $(0x3), (pagetabel - 0xC0000000 + 1023 * 8 + 4)
+
+	movl $(pagepointer - 0xC0000000), %ecx
+	movl %ecx, %cr3
 
 	movl %cr0, %ecx
 	orl $0x80010000, %ecx
 	movl %ecx, %cr0
 
+	movl %cr4, %ecx
+	orl $0x10, %ecx
+	movl %ecx, %cr4
+
+	leal 2f, %ecx
+	jmp *%ecx
+2:
 	# unmap identity paging
 	movl $0, pagepointer
 	movl $0, pagepointer + 4
-
-	lea 2f, %ecx
-	jmp *%ecx
-2:
 
 	movl $stack_top, %esp
 
