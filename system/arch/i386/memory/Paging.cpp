@@ -9,18 +9,18 @@
 
 using namespace Mem_Paging;
 
-volatile uint64_t pagedir[512] __attribute__((aligned(4096)));
+/*volatile uint64_t pagedir[512] __attribute__((aligned(4096)));
 volatile uint64_t pagetabel[512] __attribute__((aligned(4096)));
 volatile uint64_t pagetabel1[512] __attribute__((aligned(4096)));
-volatile uint64_t page_dir_ptr[4] __attribute__((aligned(32)));
+volatile uint64_t page_dir_ptr[4] __attribute__((aligned(32)));*/
 
 /**
  * Setup paging, should be called only once by boot code
  * Enables PEA paging mode
  */
 void Mem_Paging::initPaging(){
-	asm volatile
 
+/*
 	page_dir_ptr[0] = 0;
 	page_dir_ptr[1] = 0;
 	page_dir_ptr[2] = 0;
@@ -50,6 +50,7 @@ void Mem_Paging::initPaging(){
 	page_dir[507] = (uint64_t) &page_dir_ptr; // map the PDPT to the directory
 
 	asm volatile ("movl %%cr4, %%eax; bts $5, %%eax; movl %0, %%cr3; movl %%eax, %%cr4" :: "a" (&page_dir_ptr)); // set bit5 in CR4 to enable PAE
+	*/
 }
 
 /**
