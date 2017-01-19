@@ -22,7 +22,7 @@ stack_bottom:
 stack_top:
 
 # Reserve space for the page directory and first page table
-.section .data
+.section .bss, "aw", @nobits
 .align 4096
 .globl pagedir
 .globl pagetabel
@@ -76,7 +76,7 @@ _start:
 
 	# second and third pagedirs still have to be mapped here
 
-	movl $(pagedir - 0xC0000000), (pagedir - 0xC0000000 + 8*511)
+	movl $(pagedir - 0xC0000000), %edx
 	orl $0x03, %edx
 	movl %edx, (pagedir - 0xC0000000 + 8*511 + 4)
 	movl $0x0, (pagedir - 0xC0000000 + 8*511)
