@@ -25,6 +25,7 @@ extern "C" {
 		//Mem_Paging::initPaging();
 		shell::initialize(&ld_kernel_start, &ld_kernel_end);
 		printf("Hello, kernel World!\n");
+		//printf("%x", Mem_Paging::getPhysicalAddress(0xC00B8000));
 	}
 }
 
