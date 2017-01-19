@@ -37,8 +37,8 @@ SECTIONS
 	.bss ALIGN(4K) : AT (ADDR (.bss) - 0xC0000000)
 	{
 		*(COMMON)
-		*(.bss)
 		*(.bss_stack)
+		*(.bss)
 	}
 	
 	ld_kernel_end = . ;

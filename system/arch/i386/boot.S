@@ -5,8 +5,6 @@
 .set MAGIC,    0x1BADB002       # 'magic number' lets bootloader find the header
 .set CHECKSUM, -(MAGIC + FLAGS) # checksum of above, to prove we are multiboot
 
-.set VGA_BUF, 0x000B8000
-
 # Declare a header as in the Multiboot Standard.
 .section .multiboot
 .align 4
@@ -24,18 +22,18 @@ stack_top:
 # Reserve space for the page directory and first page table
 .section .bss, "aw", @nobits
 .align 4096
-.globl pagedir
-.globl pagetabel
-.globl pagetabel1
-.globl pagepointer
-pagedir:
+.globl boot_pagedir
+.globl boot_pagetabel
+.globl boot_pagetabel1
+.globl boot_pagepointer
+boot_pagedir:
 	.skip 4096, 0
-pagetabel:
+boot_pagetabel:
 	.skip 4096, 0
-pagetabel1:
+boot_pagetabel1:
 	.skip 4096, 0
-pagepointer:
-	.skip 4096, 0
+boot_pagepointer:
+	.skip 32, 0
 
 # The kernel entry point.
 .section .text
@@ -43,93 +41,115 @@ pagepointer:
 .type _start, @function
 _start:
 
-	# set the page pointer table third index to the page dir
-	# to map from 0xC0000000 the page dir must be mapped to the third entry in the page pointer table
-	movl $(pagedir - 0xC0000000), %edx
-	orl $0x03, %edx
-	movl %ebx, (pagepointer - 0xC0000000 + 28)
-	movl $0x0, (pagepointer - 0xC0000000 + 24)
+	# Physical address of boot_pagetab1.
+	# TODO: I recall seeing some assembly that used a macro to do the
+	#       conversions to and from physical. Maybe this should be done in this
+	#       code as well?
+	movl $(boot_pagetabel - 0xC0000000), %edi
+	# First address to map is address 0.
+	# TODO: Start at the first kernel page instead. Alternatively map the first
+	#       1 MiB as it can be generally useful, and there's no need to
+	#       specially map the VGA buffer.
+	movl $0, %esi
+	# Map 512 pages. Each page table contains 512 entries so we have to run through the tables sepretly.
+	# It maps the entire first 1 MiB so there is no need the specificly map the VGA BUF
+	movl $1024, %ecx
+1:
+	# Map physical address as "present, writable". Note that this maps
+	# .text and .rodata as writable. Mind security and map them as non-writable.
+	movl %esi, %edx
+	andl $0xFFFFF000, %edx
+	orl $0x003, %edx
+	movl %edx, (%edi)
 
-	# temporarily identity map the first dir
-	movl $(pagedir - 0xC0000000), %edx
-	orl $0x03, %edx
-	movl %edx, (pagepointer - 0xC0000000 + 4)
-	movl $0x0, (pagepointer - 0xC0000000)
+	# add 4 bytes to point %edi to the lower half of the table entry
+	addl $4, %edi
 
+	# Set higher half of table entry to zero. all mapped locations will be below 1 GiB and
+	# thus this part is not needed. Because the file is in little endian, meaning the least
+	# significant byte comes first in memory, the address must be loaded first and then the rest
+	movl $0x0, (%edi)
 
-	# Fill page dir
-	# to map one MiB two page tables are needed, last entrys are mapped to the page dirs themself so are not used
-	movl $(pagetabel - 0xC0000000), %edx
-	orl $0x03, %edx
-	movl %edx, (pagedir - 0xC0000000 + 4)
-	movl $0x0, (pagedir - 0xC0000000)
+	# Size of page is 4096 bytes.
+	addl $4096, %esi
+	# Size of entries in boot_pagetab1 is 8 bytes but we are first moving to the higher half of the next entry.
+	addl $4, %edi
+	# Loop to the next entry if we haven't finished.
+	loop 1b
+2:
+	# !NO NEED FOR THIS ANYMORE!
+	# Map VGA video memory to 0xC03FF000 as "present, writable".
+	#movl $(0x000B8000 | 0x003), boot_pagetabel - 0xC0000000 + 1023 * 4
 
-	movl $(pagetabel1 - 0xC0000000), %edx
+	# Mapping page tables to first and second entry of the pagedir
+	# When placing the pagedir in the first entry of the page dir pointer table the first 1 MiB
+	# is automaticly identity mapped. When placing the pagedir in the last entry of the pointer table
+	# the first 1 MiB is mapped to 0xC0000000.
+	movl $(boot_pagetabel - 0xC0000000), %edx
+	andl $0xFFFFF000, %edx
 	orl $0x03, %edx
-	movl %edx, (pagedir - 0xC0000000 + 12)
-	movl $0x0, (pagedir - 0xC0000000 + 8)
+	movl %edx, boot_pagedir - 0xC0000000
+	movl $0x0, boot_pagedir - 0xC0000000 + 4
 
-	movl $(pagepointer - 0xC0000000), %edx
+	movl $(boot_pagetabel1 - 0xC0000000), %edx
+	andl $0xFFFFF000, %edx
 	orl $0x03, %edx
-	movl %edx, (pagedir - 0xC0000000 + 8*507 + 4)
-	movl $(0x0), (pagedir - 0xC0000000 + 8*507)
+	movl %edx, boot_pagedir - 0xC0000000 + 8
+	movl $0x0, boot_pagedir - 0xC0000000 + 12
+
+	# mapping the page dir pointer table
+	movl $(boot_pagepointer - 0xC0000000), %edx
+	andl $0xFFFFF000, %edx
+	orl $0x03, %edx
+	movl %edx, boot_pagedir - 0xC0000000 + 8*507
+	movl $0x0, boot_pagedir - 0xC0000000 + 8*507 + 4
 
 	# second and third pagedirs still have to be mapped here
 
-	movl $(pagedir - 0xC0000000), %edx
+	movl $(boot_pagedir - 0xC0000000), %edx
+	andl $0xFFFFF000, %edx
 	orl $0x03, %edx
-	movl %edx, (pagedir - 0xC0000000 + 8*511 + 4)
-	movl $0x0, (pagedir - 0xC0000000 + 8*511)
+	movl %edx, boot_pagedir - 0xC0000000 + 8*511
+	movl $0x0, boot_pagedir - 0xC0000000 + 8*511 + 4
 
-	# start filling pagetable at address 0
-	movl $1023, %ecx
-	# map physical address 0 to virtual address 0xC0000000
-	movl $0, %esi
-	movl $(pagetabel), %edi
-1:
-	# set top half of table entry to zero
-	movl $0x0, (%edi)
-	addl $4, %edi
+	# set page pointer table entrys
+	movl $(boot_pagedir - 0xC0000000), %edx
+	andl $0xFFFFF000, %edx
+	orl $1, %edx
+	movl %edx, boot_pagepointer - 0xC0000000
+	movl %edx, boot_pagepointer - 0xC0000000 + 24
+	movl $0x0, boot_pagepointer - 0xC0000000 + 4
+	movl $0x0, boot_pagepointer - 0xC0000000 + 28
 
-	# set address to lower half of entery and set readable and present
-	movl %esi, %edx
-	orl $0x03, %edx
-	movl %edx, (%edi)
-
-	addl $4096, %esi
-	addl $4, %edi
-
-	# this will run through both page tables at the same time, so they have to be following each other
-	loop 1b
-
-	# seperate mapping for vga buffer
-	movl $(VGA_BUF), %edx
-	orl $0x03, %edx
-	movl %edx, (pagetabel - 0xC0000000 + 1023 * 8 + 4)
-	movl $0x0, (pagetabel - 0xC0000000 + 1023 * 8)
-
-	movl $(pagepointer - 0xC0000000), %ecx
+	# Set cr3 to the address of the boot_page_directory.
+	movl $(boot_pagepointer - 0xC0000000), %ecx
 	movl %ecx, %cr3
 
-	movl %cr4, %ecx
-	orl $0x10, %ecx
-	movl %ecx, %cr4
+	# enable PEA paging mode
+	movl %cr4, %edx
+	orl $0x20, %edx
+	movl %edx, %cr4
 
+	# Enable paging and the write-protect bit.
 	movl %cr0, %ecx
 	orl $0x80010000, %ecx
 	movl %ecx, %cr0
 
-	lea 2f, %ecx
+	# Jump to higher half with an absolute jump.
+	lea 3f, %ecx
 	jmp *%ecx
-2:
-	# unmap identity paging
-	movl $0x0, pagepointer
-	movl $0x0, pagepointer + 4
+
+3:
+	# At this point, paging is fully set up and enabled.
+
+	# Unmap the identity mapping as it is now unnecessary.
+	movl $0, boot_pagepointer
+
+	# Reload crc3 to force a TLB flush so the changes to take effect.
+	movl %cr3, %ecx
+	movl %ecx, %cr3
 
 	movl $stack_top, %esp
-
-	# Call the early/init kernel function
-	call initKernel
 
 	# Call the global constructors.
 	call _init
@@ -139,6 +159,6 @@ _start:
 
 	# Hang if kernel_main unexpectedly returns.
 	cli
-5:	hlt
-	jmp 5b
+4:	hlt
+	jmp 4b
 .size _start, . - _start

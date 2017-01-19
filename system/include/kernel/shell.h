@@ -46,7 +46,7 @@ namespace shell {
 
 		static const size_t VGA_WIDTH = 80;
 		static const size_t VGA_HEIGHT = 25;
-		static const uint16_t* VGA_MEMORY = (uint16_t*) 0xC03FF000;
+		static const uint16_t* VGA_MEMORY = (uint16_t*) 0xC00B8000;
 
 		static uint16_t* vga_buffer = (uint16_t *) VGA_MEMORY;	//offset terminal by one line
 
