@@ -8,15 +8,24 @@
 #include <stdio.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <kernel/types.h>
 
 namespace Mem_Paging {
 
-	const addr_t virt_adr_kernel = 0xC0100000;
+	const uint32_t virt_adr_kernel = 0xC0100000;
 
 	void initPaging();
 
-	void *getPhysicalAddress(addr_t virt);
+	uint64_t getPhysicalAddress(uint32_t virt);
+
+	uint64_t allocPage();
+
+	uint64_t allocPage(int pages);
+
+	void setPageEntry(uint64_t phys, uint32_t virt, bool RW, bool US, bool PWT, bool PCD, bool Global);
+
+	void setPageAddr(uint64_t phys, uint32_t virt);
+
+	void setPageFlags(uint32_t virt, bool RW, bool US, bool PWT, bool PCD, bool Global);
 }
 
 

@@ -138,7 +138,6 @@ _start:
 	# Jump to higher half with an absolute jump.
 	lea 3f, %ecx
 	jmp *%ecx
-
 3:
 	# At this point, paging is fully set up and enabled.
 

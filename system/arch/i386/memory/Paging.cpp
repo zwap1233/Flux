@@ -9,55 +9,104 @@
 
 using namespace Mem_Paging;
 
-/*volatile uint64_t pagedir[512] __attribute__((aligned(4096)));
-volatile uint64_t pagetabel[512] __attribute__((aligned(4096)));
-volatile uint64_t pagetabel1[512] __attribute__((aligned(4096)));
-volatile uint64_t page_dir_ptr[4] __attribute__((aligned(32)));*/
+//Entire pageing structure can be read from this point
+extern uint64_t boot_pagepointer[4];
 
 /**
- * Setup paging, should be called only once by boot code
- * Enables PEA paging mode
+ * Paging init function
  */
 void Mem_Paging::initPaging(){
 
-/*
-	page_dir_ptr[0] = 0;
-	page_dir_ptr[1] = 0;
-	page_dir_ptr[2] = 0;
-	page_dir_ptr[3] = (uint64_t) &pagedir;
-
-	pagedir[0] = (uint64_t) &pagetabel | 3;
-	pagedir[1] = (uint64_t) &pagetabel1 | 3;
-
-	uint64_t addr = 0;
-	for(int i = 0; i < 512; i++){
-		pagetabel[i] = (addr & 0xfffffffffffff000) | 3;	//map addr and mark as present and writable
-		addr += 4096;
-	}
-
-	for(int i = 0; i < 511; i++){
-		pagetabel1[i] = (addr & 0xfffffffffffff000) | 3;	//map addr and mark as present and writable
-		addr += 4096;
-	}
-	pagetabel1[511] = 0x000B8000 | 3;
-
-	uint64_t *page_dir = (uint64_t*) (page_dir_ptr[3] & 0xfffffffffffff000); // get the page directory and remove flags
-
-	page_dir[511] = (uint64_t) page_dir; // map pd to itself
-	page_dir[510] = page_dir_ptr[2]; // map pd3 to it
-	page_dir[509] = page_dir_ptr[1]; // map pd2 to it
-	page_dir[508] = page_dir_ptr[0]; // map pd1 to it
-	page_dir[507] = (uint64_t) &page_dir_ptr; // map the PDPT to the directory
-
-	asm volatile ("movl %%cr4, %%eax; bts $5, %%eax; movl %0, %%cr3; movl %%eax, %%cr4" :: "a" (&page_dir_ptr)); // set bit5 in CR4 to enable PAE
-	*/
 }
 
 /**
  * Get the physical address that belongs to the given virtual address by addr_t virt
+ * If virt isnt mapped this returns zero
  *
  * @param virt
+ * @return		physical address, shouldnt be read or written to
  */
-void *Mem_Paging::getPhysicalAddress(addr_t virt){
-	//TODO: Write function
+uint64_t Mem_Paging::getPhysicalAddress(uint32_t virt){
+	uint32_t ptrindex = virt >> 30;
+	uint32_t dirindex = 0x3FE00000 & (virt >> 20);
+	uint32_t tabindex = 0x1FF000 & (virt >> 12);
+	if(ptrindex > 3 || dirindex > 511 || tabindex > 511){
+		printf("ERROR getPhysicalAddress: invalid address");
+	}
+
+	//TODO: breaks when called, why?
+
+	//TODO: Uses a trick to get virtual address of page tabels and dirs, this works for now but should be made robust
+	if((boot_pagepointer[ptrindex] & 0x1) != 0){
+		uint64_t *pagedir = (uint64_t *) ((boot_pagepointer[ptrindex] | 0xC0000000) & 0xFFFFF000);
+		if((pagedir[dirindex] & 0x1) != 0){
+			uint64_t *pagetab = (uint64_t *) ((pagedir[dirindex] | 0xC0000000 ) & 0xFFFFF000);
+			if((pagetab[tabindex] & 0x1) != 0){
+				return (pagetab[tabindex] & 0xFFFFF000);
+			}
+		}
+	}
+
+	return 0;
+}
+
+/**
+ * Allocate a single page
+ * should only be called by memory mangement
+ *
+ * @return	physical address of allocated page
+ */
+uint64_t Mem_Paging::allocPage(){
+	return allocPage(1);
+}
+
+/**
+ * Allocate several pages.
+ * the allocated pages dont have to be in order
+ *
+ * @param pages		Amount of pages to be allocated
+ * @return			physical address of allocated page
+ */
+uint64_t Mem_Paging::allocPage(int pages){
+	return 0;
+}
+
+/**
+ * Map the physical address denoted by phys to the virtual address denoted by virt. the flags are then set
+ *
+ * @param phys
+ * @param virt
+ * @param RW		if true page is read only
+ * @param US		if true user mode is allowed access to page
+ * @param PWT		if true write-through mode is enabled
+ * @param PCD		if true cache is not used
+ * @param Global	if true page is set as global page
+ */
+void Mem_Paging::setPageEntry(uint64_t phys, uint32_t virt, bool RW, bool US, bool PWT, bool PCD, bool Global){
+	//TODO: Write body
+}
+
+/**
+ * Map the virtual address denoted by virt to the physical address denoted by phys
+ * only works if entry already exsist
+ *
+ * @param phys
+ * @param virt
+ */
+void Mem_Paging::setPageAddr(uint64_t phys, uint32_t virt){
+	//TODO: Write body
+}
+
+/**
+ * Set the flags for the page denoted by virt
+ *
+ * @param virt
+ * @param RW		if true page is read only
+ * @param US		if true user mode is allowed access to page
+ * @param PWT		if true write-through mode is enabled
+ * @param PCD		if true cache is not used
+ * @param Global	if true page is set as global page
+ */
+void Mem_Paging::setPageFlags(uint32_t virt, bool RW, bool US, bool PWT, bool PCD, bool Global){
+	//TODO: Write body
 }
