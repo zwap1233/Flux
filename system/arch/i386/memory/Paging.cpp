@@ -58,6 +58,7 @@ void Mem_Paging::initPaging(){
  *
  * @param virt
  */
-void *Mem_Paging::getPhysicalAddress(addr_t virt){
+char Mem_Paging::getPhysicalAddress(addr_t virt){
 	//TODO: Write function
+	return 'c';
 }

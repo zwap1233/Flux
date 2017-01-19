@@ -1,7 +1,7 @@
 /* The bootloader will look at this image and start execution at the symbol
    designated at the entry point. */
 ENTRY(_start)
-
+OUTPUT_FORMAT(elf32-i386)
 /* Tell where the various sections of the object files will be put in the final
    kernel image. */
 SECTIONS

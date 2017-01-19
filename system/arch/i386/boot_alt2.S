@@ -25,7 +25,7 @@ stack_top:
 .globl boot_pagedir
 .globl boot_pagetabel
 boot_pagedir:
-	.skip 4096, 0
+	.skip 4096
 boot_pagetabel:
 	.skip 4096
 
@@ -62,7 +62,6 @@ _start:
 	# Loop to the next entry if we haven't finished.
 	loop 1b
 
-2:
 	# Map VGA video memory to 0xC03FF000 as "present, writable".
 	movl $(0x000B8000 | 0x003), boot_pagetabel - 0xC0000000 + 1023 * 4
 
@@ -87,10 +86,10 @@ _start:
 	movl %ecx, %cr0
 
 	# Jump to higher half with an absolute jump.
-	lea 3f, %ecx
+	lea 2f, %ecx
 	jmp *%ecx
 
-3:
+2:
 	# At this point, paging is fully set up and enabled.
 
 	# Unmap the identity mapping as it is now unnecessary.
@@ -113,6 +112,6 @@ _start:
 
 	# Hang if kernel_main unexpectedly returns.
 	cli
-4:	hlt
-	jmp 4b
+3:	hlt
+	jmp 3b
 .size _start, . - _start

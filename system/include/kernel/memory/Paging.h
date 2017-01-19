@@ -16,7 +16,7 @@ namespace Mem_Paging {
 
 	void initPaging();
 
-	void *getPhysicalAddress(addr_t virt);
+	char getPhysicalAddress(addr_t virt);
 }
 
 

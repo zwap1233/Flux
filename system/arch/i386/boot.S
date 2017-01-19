@@ -5,8 +5,6 @@
 .set MAGIC,    0x1BADB002       # 'magic number' lets bootloader find the header
 .set CHECKSUM, -(MAGIC + FLAGS) # checksum of above, to prove we are multiboot
 
-.set VGA_BUF, 0x000B8000
-
 # Declare a header as in the Multiboot Standard.
 .section .multiboot
 .align 4
@@ -29,25 +27,24 @@ stack_top:
 .globl pagetabel1
 .globl pagepointer
 pagedir:
-	.skip 4096, 0
+	.skip 4096
 pagetabel:
-	.skip 4096, 0
+	.skip 4096
 pagetabel1:
-	.skip 4096, 0
+	.skip 4096
 pagepointer:
-	.skip 4096, 0
+	.skip 4096
 
 # The kernel entry point.
 .section .text
 .global _start
 .type _start, @function
 _start:
-
 	# set the page pointer table third index to the page dir
 	# to map from 0xC0000000 the page dir must be mapped to the third entry in the page pointer table
 	movl $(pagedir - 0xC0000000), %edx
 	orl $0x03, %edx
-	movl %ebx, (pagepointer - 0xC0000000 + 28)
+	movl %edx, (pagepointer - 0xC0000000 + 28)
 	movl $0x0, (pagepointer - 0xC0000000 + 24)
 
 	# temporarily identity map the first dir
@@ -76,7 +73,7 @@ _start:
 
 	# second and third pagedirs still have to be mapped here
 
-	movl $(pagedir - 0xC0000000), (pagedir - 0xC0000000 + 8*511)
+	movl $(pagedir - 0xC0000000), %edx
 	orl $0x03, %edx
 	movl %edx, (pagedir - 0xC0000000 + 8*511 + 4)
 	movl $0x0, (pagedir - 0xC0000000 + 8*511)
@@ -103,7 +100,7 @@ _start:
 	loop 1b
 
 	# seperate mapping for vga buffer
-	movl $(VGA_BUF), %edx
+	movl $0x000B8000, %edx
 	orl $0x03, %edx
 	movl %edx, (pagetabel - 0xC0000000 + 1023 * 8 + 4)
 	movl $0x0, (pagetabel - 0xC0000000 + 1023 * 8)
@@ -125,6 +122,9 @@ _start:
 	# unmap identity paging
 	movl $0x0, pagepointer
 	movl $0x0, pagepointer + 4
+
+	movl %cr3, %ecx
+	movl %ecx, %cr3
 
 	movl $stack_top, %esp
 
