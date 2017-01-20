@@ -34,7 +34,7 @@ uint64_t Mem_Paging::getPhysicalAddress(uint32_t virt){
 		printf("ERROR getPhysicalAddress: invalid address");
 	}
 
-	//TODO: breaks when called, why?
+	//TODO: breaks pagging when called, why?
 
 	//TODO: Uses a trick to get virtual address of page tabels and dirs, this works for now but should be made robust
 	if((boot_pagepointer[ptrindex] & 0x1) != 0){
