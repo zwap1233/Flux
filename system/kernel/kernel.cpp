@@ -1,6 +1,10 @@
-#include <kernel/shell.h>
+#include <kernel.h>
+
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
+
+#include <kernel/shell.h>
 #include <kernel/memory/Paging.h>
 
 extern uint32_t ld_kernel_start;
@@ -11,11 +15,11 @@ extern "C" {
 	void earlyKernel(void);
 	void mainKernel(void);
 
-
 	/**
 	 * Early init point for kernel, is called by boot.S before the global constructors are initialized
 	 */
 	void earlyKernel(void){
+		__stack_chk_guard_setup();
 	}
 
 	/**
@@ -24,11 +28,39 @@ extern "C" {
 	void mainKernel(void) {
 		shell::initialize(&ld_kernel_start, &ld_kernel_end);
 		printf("Hello, kernel World!\n");
-		//printf("%x", Mem_Paging::getPhysicalAddress(0xC00B8000));
 	}
 }
 
-/***********************************************************8
+__attribute__((noreturn))
+void panic(const char *msg){
+	printf(msg);
+
+	while(true){};
+}
+
+
+/************************************************************
+ * 		Stack smashing protector
+ */
+
+uintptr_t __stack_chk_guard = 0x2a6d00f3;
+
+extern "C" {
+
+	__attribute__((noreturn))
+	void __stack_chk_fail();
+
+	void __stack_chk_guard_setup(void){
+		//TODO: implement a more complex way to randomize the guard value
+	}
+
+	__attribute__((noreturn))
+	void __stack_chk_fail(void){
+		panic("Stack smash detected");
+	}
+}
+
+/************************************************************
  * 		c++ support functions
  */
 
