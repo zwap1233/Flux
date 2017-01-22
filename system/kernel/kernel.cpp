@@ -8,21 +8,20 @@ extern uint32_t ld_kernel_end;
 
 extern "C" {
 
-	void initKernel(void);
+	void earlyKernel(void);
 	void mainKernel(void);
 
 
 	/**
 	 * Early init point for kernel, is called by boot.S before the global constructors are initialized
 	 */
-	void initKernel(void){
+	void earlyKernel(void){
 	}
 
 	/**
 	 * Starting point for the kernel
 	 */
 	void mainKernel(void) {
-		//Mem_Paging::initPaging();
 		shell::initialize(&ld_kernel_start, &ld_kernel_end);
 		printf("Hello, kernel World!\n");
 		//printf("%x", Mem_Paging::getPhysicalAddress(0xC00B8000));

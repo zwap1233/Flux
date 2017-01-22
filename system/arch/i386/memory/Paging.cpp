@@ -7,7 +7,7 @@
 
 #include <kernel/memory/Paging.h>
 
-using namespace Mem_Paging;
+using namespace memory;
 
 //Entire pageing structure can be read from this point
 extern uint64_t boot_pagepointer[4];
@@ -15,7 +15,7 @@ extern uint64_t boot_pagepointer[4];
 /**
  * Paging init function
  */
-void Mem_Paging::initPaging(){
+void memory::initializePaging(){
 
 }
 
@@ -26,7 +26,7 @@ void Mem_Paging::initPaging(){
  * @param virt
  * @return		physical address, shouldnt be read or written to
  */
-uint64_t Mem_Paging::getPhysicalAddress(uint32_t virt){
+uint64_t memory::getPhysicalAddress(uint32_t virt){
 	uint32_t ptrindex = virt >> 30;
 	uint32_t dirindex = 0x3FE00000 & (virt >> 20);
 	uint32_t tabindex = 0x1FF000 & (virt >> 12);
@@ -56,7 +56,7 @@ uint64_t Mem_Paging::getPhysicalAddress(uint32_t virt){
  *
  * @return	physical address of allocated page
  */
-uint64_t Mem_Paging::allocPage(){
+uint64_t memory::allocPage(){
 	return allocPage(1);
 }
 
@@ -67,7 +67,7 @@ uint64_t Mem_Paging::allocPage(){
  * @param pages		Amount of pages to be allocated
  * @return			physical address of allocated page
  */
-uint64_t Mem_Paging::allocPage(int pages){
+uint64_t memory::allocPage(int pages){
 	return 0;
 }
 
@@ -82,7 +82,7 @@ uint64_t Mem_Paging::allocPage(int pages){
  * @param PCD		if true cache is not used
  * @param Global	if true page is set as global page
  */
-void Mem_Paging::setPageEntry(uint64_t phys, uint32_t virt, bool RW, bool US, bool PWT, bool PCD, bool Global){
+void memory::setPageEntry(uint64_t phys, uint32_t virt, bool RW, bool US, bool PWT, bool PCD, bool Global){
 	//TODO: Write body
 }
 
@@ -93,7 +93,7 @@ void Mem_Paging::setPageEntry(uint64_t phys, uint32_t virt, bool RW, bool US, bo
  * @param phys
  * @param virt
  */
-void Mem_Paging::setPageAddr(uint64_t phys, uint32_t virt){
+void memory::setPageAddr(uint64_t phys, uint32_t virt){
 	//TODO: Write body
 }
 
@@ -107,6 +107,6 @@ void Mem_Paging::setPageAddr(uint64_t phys, uint32_t virt){
  * @param PCD		if true cache is not used
  * @param Global	if true page is set as global page
  */
-void Mem_Paging::setPageFlags(uint32_t virt, bool RW, bool US, bool PWT, bool PCD, bool Global){
+void memory::setPageFlags(uint32_t virt, bool RW, bool US, bool PWT, bool PCD, bool Global){
 	//TODO: Write body
 }

@@ -9,11 +9,9 @@
 #include <stddef.h>
 #include <stdint.h>
 
-namespace Mem_Paging {
+namespace memory {
 
-	const uint32_t virt_adr_kernel = 0xC0100000;
-
-	void initPaging();
+	void initializePaging();
 
 	uint64_t getPhysicalAddress(uint32_t virt);
 

@@ -21,8 +21,8 @@ void shell::initialize(uint32_t *kernel_start, uint32_t *kernel_end) {
 		}
 	}
 
-	setForegroundColor(VGA_COLOR_LIGHT_GREEN);
-	writestring("FluxOS version 0.0.1");
+	setForegroundColor(LIGHT_GREEN);
+	writeString("FluxOS version 0.0.1");
 
 	shell_x = 0;
 	shell_y = VGA_HEIGHT - 1;
@@ -30,7 +30,7 @@ void shell::initialize(uint32_t *kernel_start, uint32_t *kernel_end) {
 
 	vga_buffer = (uint16_t *) VGA_MEMORY + VGA_WIDTH;
 	setCursor(0,0);
-	setForegroundColor(VGA_COLOR_LIGHT_GREY);
+	setForegroundColor(LIGHT_GREY);
 }
 
 /**
@@ -54,7 +54,7 @@ void shell::putentryat(unsigned char c, enum shell_color foregroundcolor, enum s
  * @param x
  * @param y
  */
-void shell::putchar_at(char c, size_t x, size_t y) {
+void shell::putcharat(char c, size_t x, size_t y) {
 	setCursor(x, y);
 	putchar(c);
 }
@@ -101,7 +101,7 @@ void shell::write(const char* data, size_t size) {
  *
  * @param data
  */
-void shell::writestring(const char* data) {
+void shell::writeString(const char* data) {
 	write(data, strlen(data));
 }
 

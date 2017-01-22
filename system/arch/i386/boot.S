@@ -153,6 +153,9 @@ _start:
 
 	movl $stack_top, %esp
 
+	# Early call to the kernel
+	call earlyKernel
+
 	# Call the global constructors.
 	call _init
 
