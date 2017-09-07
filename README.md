@@ -3,6 +3,19 @@
 FluxOS is a generic UNIX operating system designed for radio comunications.
 The project is foremost a learning experience. The final outcome of the system is vague.
 
+## Setting Up
+Detail how to build and run (with qemu) FluxOS and how to setup eclipse to further develop the system.
+
+### Building and Running
+FluxOS uses makefiles to build the project at this point building the kernel is really simple. just run build.sh, it will run the makefile with the right settings considering there is only one target available at this point.
+
+After having build the system qemu.sh can be used to emulate a i686 system on which the kernel is loaded.
+
+There is a overhaul of the system in progress.
+
+### Setting up eclipse for development
+Finish this
+
 ## Technical details
 About the innerworkings of the system
 
