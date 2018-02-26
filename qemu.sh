@@ -1,6 +1,15 @@
 #!/bin/sh
-set -e
-. ./clean.sh
-. ./build.sh
+make
 
-qemu-system-$(./target-triplet-to-arch.sh $HOST) -kernel system/$KERNFILE
+HOST=i686-elf
+KERNFILE=Flux.bin
+
+if echo $HOST | grep -Eq 'i[[:digit:]]86-'; then
+    HOSTARCH=i386
+else 
+    echo $HOST
+    grep -Eo '^[[:alnum:]_]*'
+    HOSTARCH=$?
+fi
+
+qemu-system-$HOSTARCH -kernel system/$KERNFILE

@@ -1,23 +1,22 @@
-DEFAULT_HOST!=../default-host.sh
-HOST?=$(DEFAULT_HOST)
-HOSTARCH!=../target-triplet-to-arch.sh $(HOST)
+
+HOST?=i686-elf
+HOSTARCH?=$(shell if echo $(HOST) | grep -Eq 'i[[:digit:]]86-'; then echo i386; else echo $(HOST) | grep -Eo '^[[:alnum:]_]*'; fi)
 
 CFLAGS?=-O2 -g
 CPPFLAGS?=-fno-exceptions -fno-rtti
 LDFLAGS?=
 LIBS?=
 
-DESTDIR?=
-PREFIX?=/usr/local
-EXEC_PREFIX?=$(PREFIX)
-BOOTDIR?=$(EXEC_PREFIX)/boot
+DESTDIR?=$(HOME)/sysroot
+PREFIX?=/usr
+BOOTDIR?=/boot
 INCLUDEDIR?=$(PREFIX)/include
 
 ARCHDIR=arch/$(HOSTARCH)
 
 include $(ARCHDIR)/make.config
 
-WARNINGS:= 	-Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align \
+WARNINGS:=  -Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align \
             -Wwrite-strings -Wmissing-declarations \
             -Wredundant-decls -Winline -Wno-long-long \
             -Wuninitialized -Wconversion
@@ -28,7 +27,7 @@ CPPFLAGS:=$(CPPFLAGS) -D__is_kernel -Iinclude $(KERNEL_ARCH_CPPFLAGS)
 LDFLAGS:=$(LDFLAGS) $(KERNEL_ARCH_LDFLAGS)
 LIBS:=$(LIBS) -nostdlib -lk -lgcc $(KERNEL_ARCH_LIBS)
 
-KERNFILE?=FluxOS.bin
+KERNFILE?=Flux.bin
 #Backup for linker, should be set in arch .config file
 LINKER?=linker.ld
 

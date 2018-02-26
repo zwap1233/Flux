@@ -1,23 +1,22 @@
-DEFAULT_HOST!=../default-host.sh
-HOST?=$(DEFAULT_HOST)
-HOSTARCH!=../target-triplet-to-arch.sh $(HOST)
+
+HOST?=i686-elf
+HOSTARCH:=$(shell if echo $(HOST) | grep -Eq 'i[[:digit:]]86-'; then echo i386; else echo $(HOST) | grep -Eo '^[[:alnum:]_]*'; fi)
 
 CFLAGS?=-O2 -g
 CPPFLAGS?=
 LDFLAGS?=
 LIBS?=
 
-DESTDIR?=
-PREFIX?=/usr/local
-EXEC_PREFIX?=$(PREFIX)
+DESTDIR?=$(HOME)/sysroot
+PREFIX?=/usr
+LIBDIR?=$(PREFIX)/lib
 INCLUDEDIR?=$(PREFIX)/include
-LIBDIR?=$(EXEC_PREFIX)/lib
 
-ARCHDIR=arch/$(HOSTARCH)
+ARCHDIR=arch/i386
 
 include $(ARCHDIR)/make.config
 
-WARNINGS:= 	-Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align \
+WARNINGS:=  -Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align \
             -Wwrite-strings -Wmissing-declarations \
             -Wredundant-decls -Winline -Wno-long-long \
             -Wuninitialized -Wconversion
@@ -66,7 +65,7 @@ libk.a: $(LIBK_OBJS)
 .S.libk.o:
 	$(CC) -MD -c $< -o $@ $(LIBK_CFLAGS) $(LIBK_CPPFLAGS)
 
-clean:
+clean:	
 	@rm -f $(BINARIES) *.a
 	@rm -f $(OBJS) $(LIBK_OBJS) *.o */*.o */*/*.o
 	@rm -f $(OBJS:.o=.d) $(LIBK_OBJS:.o=.d) *.d */*.d */*/*.d
