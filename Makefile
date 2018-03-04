@@ -49,9 +49,9 @@ install: sysroot
 	@for p in $(PROJECTS); do cd ./$$p; $(MAKE) install-binairies; cd ..; done
 	
 	@grub-file --is-x86-multiboot system/$(KERNFILE); \
-	@if [ "$$?" -eq "1" ] ; then \
-	@	echo 'ERROR: Kernel file is not multiboot'; \
-	@fi;
+	if [ "$$?" -eq "1" ] ; then \
+		echo 'ERROR: Kernel file is not multiboot'; \
+	fi;
 	
 install-iso: install
 	@mkdir -p $(ISODIR)
