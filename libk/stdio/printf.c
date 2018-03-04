@@ -131,11 +131,10 @@ char *convert(unsigned int num, int base) {
     ptr = &buffer[49];
     *ptr = '\0';
 
-    do
-    {
-        *--ptr = Representation[num%base];
+    do {
+    	*--ptr = Representation[num%base];
         num /= base;
-    }while(num != 0);
+    } while(num != 0);
 
     return(ptr);
 }
