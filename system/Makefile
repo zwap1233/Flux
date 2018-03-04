@@ -1,3 +1,4 @@
+#system makefile
 
 HOST?=i686-elf
 HOSTARCH?=$(shell if echo $(HOST) | grep -Eq 'i[[:digit:]]86-'; then echo i386; else echo $(HOST) | grep -Eo '^[[:alnum:]_]*'; fi)
@@ -51,7 +52,7 @@ $(LIBS) \
 $(ARCHDIR)/crtend.o \
 $(ARCHDIR)/crtn.o \
 
-.PHONY: all clean install install-headers install-kernel
+.PHONY: all clean install install-headers install-binairies
 .SUFFIXES: .o .c .cpp .S
 
 all: $(KERNFILE)
@@ -76,13 +77,15 @@ clean:
 	@rm -f $(OBJS) *.o */*.o */*/*.o
 	@rm -f $(OBJS:.o=.d) *.d */*.d */*/*.d
 
-install: install-headers install-kernel
+install: install-headers install-binairies
 
 install-headers:
+	@echo 'Install sys headers'
 	@mkdir -p $(DESTDIR)$(INCLUDEDIR)
 	@cp -R --preserve=timestamps include/. $(DESTDIR)$(INCLUDEDIR)/.
 
-install-kernel: $(KERNFILE)
+install-binairies: $(KERNFILE)
+	@echo 'Install sys'
 	@mkdir -p $(DESTDIR)$(BOOTDIR)
 	@cp $(KERNFILE) $(DESTDIR)$(BOOTDIR)
 

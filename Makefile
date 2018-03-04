@@ -1,4 +1,4 @@
-PROJECTS:=libk system
+export PROJECTS:=libk system
 
 export HOST=i686-elf
 export HOSTARCH:=$(shell if echo $(HOST) | grep -Eq 'i[[:digit:]]86-'; then echo i386; else echo $(HOST) | grep -Eo '^[[:alnum:]_]*'; fi)
@@ -31,30 +31,29 @@ export CC:=$(CC) --sysroot=$(SYSROOT)
 # because it was configured with --without-headers rather than --with-sysroot.
 export CC:=$(CC) -isystem=$(INCLUDEDIR)
 
-.PHONEY: all install clean sysroot $(PROJECTS) FORCE
+.PHONEY: all install clean sysroot install-headers build-binairies install-binairies install install-iso $(PROJECTS) FORCE
 
-all: TARGET=install
-all: sysroot $(PROJECTS)
-	@grub-file --is-x86-multiboot system/$(KERNFILE) \\
-	@if [ "$?" -eq "1" ] ; then \\
-	@	echo 'ERROR: Kernel file is not multiboot' \\
-	@fi
-
-$(PROJECTS): FORCE
-	@cd $@ && $(MAKE) $(TARGET)
-
-FORCE:
+all: sysroot
+	@for p in $(PROJECTS); do cd ./$$p; $(MAKE) install-headers; cd ..; done
+	@for p in $(PROJECTS); do cd ./$$p; $(MAKE) all; cd ..; done
 	
-sysroot:
-	@mkdir $(SYSROOT)
-
-clean: TARGET=clean
-clean: $(PROJECTS)
+clean:
+	@for p in $(PROJECTS); do cd ./$$p; $(MAKE) clean; cd ..; done
+	
 	@rm -rf $(SYSROOT) && echo 'Removed: $(SYSROOT)'
 	@rm -rf $(ISODIR) && echo 'Removed: $(ISODIR)'
 	@rm -rf $(ISOFILE) && echo 'Removed: $(ISOFILE)'
 
-install: all
+install: sysroot
+	@for p in $(PROJECTS); do cd ./$$p; $(MAKE) install-headers; cd ..; done
+	@for p in $(PROJECTS); do cd ./$$p; $(MAKE) install-binairies; cd ..; done
+	
+	@grub-file --is-x86-multiboot system/$(KERNFILE); \
+	@if [ "$$?" -eq "1" ] ; then \
+	@	echo 'ERROR: Kernel file is not multiboot'; \
+	@fi;
+	
+install-iso: install
 	@mkdir -p $(ISODIR)
 	@mkdir -p $(ISODIR)/boot
 	@mkdir -p $(ISODIR)/boot/grub
@@ -62,3 +61,6 @@ install: all
 	@cp $(SYSROOT)/boot/$(KERNFILE) $(ISODIR)/boot/$(KERNFILE)
 	@cp grub.cfg $(ISODIR)/boot/grub/grub.cfg
 	@grub-mkrescue -o $(ISOFILE) $(ISODIR)
+
+sysroot:
+	@mkdir $(SYSROOT)
