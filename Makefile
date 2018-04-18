@@ -31,11 +31,9 @@ export CC:=$(CC) --sysroot=$(SYSROOT)
 # because it was configured with --without-headers rather than --with-sysroot.
 export CC:=$(CC) -isystem=$(INCLUDEDIR)
 
-.PHONEY: all install clean sysroot install-headers build-binairies install-binairies install install-iso $(PROJECTS) FORCE
+.PHONEY: all install clean install-iso
 
-all: sysroot
-	@for p in $(PROJECTS); do cd ./$$p; $(MAKE) install-headers; cd ..; done
-	@for p in $(PROJECTS); do cd ./$$p; $(MAKE) all; cd ..; done
+all: install
 	
 clean:
 	@for p in $(PROJECTS); do cd ./$$p; $(MAKE) clean; cd ..; done
@@ -46,7 +44,7 @@ clean:
 
 install: sysroot
 	@for p in $(PROJECTS); do cd ./$$p; $(MAKE) install-headers; cd ..; done
-	@for p in $(PROJECTS); do cd ./$$p; $(MAKE) install-binairies; cd ..; done
+	@for p in $(PROJECTS); do cd ./$$p; $(MAKE) install; cd ..; done
 	
 	@grub-file --is-x86-multiboot system/$(KERNFILE); \
 	if [ "$$?" -eq "1" ] ; then \

@@ -22,7 +22,6 @@ WARNINGS:=  -Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align \
             -Wredundant-decls -Winline -Wno-long-long \
             -Wuninitialized -Wconversion
 
-C_ONLY_FLAGS:=-std=c99
 CFLAGS:=$(CFLAGS) -ffreestanding $(WARNINGS) $(ARCH_CFLAGS)
 CPPFLAGS:=$(CPPFLAGS) -D__is_libc -Iinclude $(ARCH_CPPFLAGS)
 LIBK_CFLAGS:=$(CFLAGS) $(KERNEL_ARCH_CFLAGS)
@@ -55,7 +54,7 @@ libk.a: $(LIBK_OBJS)
 	$(AR) rcs $@ $(LIBK_OBJS)
 
 .c.o:
-	$(CC) -MD -c $< -o $@ $(CFLAGS) $(CPPFLAGS) $(C_ONLY_FLAGS)
+	$(CC) -MD -c $< -o $@ $(CFLAGS) $(CPPFLAGS) -std=gnu11
 
 .c.S:
 	$(CC) -MD -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
