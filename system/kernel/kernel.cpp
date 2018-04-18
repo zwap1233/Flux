@@ -92,5 +92,5 @@ namespace __cxxabiv1 {
  * is used by the compiler as the definition for a virtual function that is nowhere implemented
  */
 extern "C" void __cxa_pure_virtual(){
-    printf("ERROR: virtual function is called\n");
+    printf("ERROR: virtual function is called but not implemented\n");
 }
