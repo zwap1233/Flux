@@ -13,8 +13,8 @@
 		<SubTask Description="Layout Structure memory management" Progress="20%" Priority="0"></SubTask>
 		<SubTask Description="Check c++ support wiki page for info about new and delete" Progress="0%" Priority="0"></SubTask></Task>
 		
-	<Task Description="Improve printf function for broader use and debug functionality" Progress="0%" Priority="1"></Task>
-	<Task Description="Construct stack smash protector" Progress="50%" Priority="0" Detail="Check implementation, is it done correctly?"></Task>
+	<Task Description="Improve printf function for broader use and debug functionality" Progress="10%" Priority="1"></Task>
+	<Task Description="Construct stack smash protector" Progress="100%" Priority="0" Detail="Check implementation, is it done correctly?"></Task>
 	<Task Description="Add c++ support" Progress="95%" Priority="1"
 		Detail="Needs a stdlib implementation for rtti (Run-Time Type Information) and exceptions">
 	</Task>
