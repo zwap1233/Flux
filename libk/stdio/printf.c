@@ -123,6 +123,12 @@ int printf(const char* format, ...) {
 	return written;
 }
 
+/**
+ * Converts a number to its equivalent with base 'base'
+ * @param num: the integer to be converted
+ * @param base: the base for the converted number
+ * @return: a pointer to a char array with the new number
+ */
 char *convert(unsigned int num, int base) {
     static char Representation[]= "0123456789ABCDEF";
     static char buffer[50];

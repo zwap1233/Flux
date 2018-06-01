@@ -20,6 +20,8 @@ extern "C" {
 	 */
 	void earlyKernel(void){
 		__stack_chk_guard_setup();
+
+		//TODO: Call constructors of static and global objects
 	}
 
 	/**
