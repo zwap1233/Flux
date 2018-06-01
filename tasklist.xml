@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Tasks>
+	<Task Description="Call Global constructors" Priority="0" Progress="100%"></Task>
+	<Task Description="Implement Build script" Progress="100%" Priority="1"></Task>
+	<Task Description="Implement Basic Terminal" Progress="100%" Priority="1"></Task>
+	
+	<Task Description="Documentation" Progress="10%" Priority="0">
+		<SubTask Description="Document code style rules" Progress="50%" Priority="-1"></SubTask>
+		<SubTask Description="Write guide how to setup the code for building and development" Progress="10%" Priority="0"></SubTask></Task>
+	
+	<Task Description="Memory Mannager" Progress="5%" Priority="0">
+		<SubTask Description="Layout Structure memory management" Progress="20%" Priority="0"></SubTask></Task>
+		
+	<Task Description="Improve printf function for broader use and debug functionality" Progress="0%" Priority="1"></Task>
+	<Task Description="Construct stack smash protector" Progress="50%" Priority="0" Detail="Check implementation, is it done correctly?"></Task>
+	<Task Description="Add c++ support" Progress="5%" Priority="1"></Task>
+</Tasks>
