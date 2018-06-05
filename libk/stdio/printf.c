@@ -2,152 +2,124 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
-int convertToNumber(const char *str, int *len, int base);
-char *convertToString(int num, int base);
+void convertToString(const int num, char *str, const int base, const int len);
+void convertUnsignedToString(unsigned int num, char *str, const int base, const int len);
+void convertDoubleToString(const double num, char *str, const int len);
 
 /**
- * Converts a string of numbers with the base 'base' to a single number
- * @param str: the string to be converted
- * @param len: a pointer to a int where the length of the found number is stored in
+ * Converts a number to its equivalent with base 'base'
+ * @param num: the integer to be converted
+ * @param ptr: the string where the number should be written to
  * @param base: the base for the converted number
- * @return: a number
  */
-int convertToNumber(const char *str, int *len, int base){
-	int result = 0;
-	int neg = 0;
-	int a = 0;
+void convertToString(const int num, char *str, const int base, const int len){
+    static char Representation[]= "0123456789ABCDEF";
+    char buf[100];
 
-	if(base < 2 || base > 16){
-		return 0;
+    buf[99] = '\0';
+    char *ptr = &buf[99];
+
+    unsigned int a = num;
+
+    if(base < 2 || base > 16){
+    	return;
+    }
+
+    if(num < 0){
+		*str = '-';
+		str++;
 	}
 
-	char cons_a = '0';
-	char cons_b = '9';
-	char cons_c = 'a';
-	char cons_d = 'f';
-	char cons_e = 'A';
-	char cons_f = 'F';
+    do {
+    	*--ptr = Representation[a%base];
 
+        a /= base;
+    } while(a != 0 && ptr != buf);
 
-	if(base < 10){
-		cons_b = (char) (cons_a + base);
+    int i;
+    for(i = 0; ptr != &buf[99] && i < len-2; ptr++, str++, i++){
+    	*str = *ptr;
+    }
 
-		cons_c = cons_a;
-		cons_d = cons_b;
-		cons_e = cons_a;
-		cons_f = cons_b;
-
-	} else {
-		cons_d = (char) (cons_c + (base - 10));
-		cons_f = (char) (cons_e + (base - 10));
-	}
-
-	while(((str[a] < cons_a && str[a] > cons_b) || (str[a] < cons_c && str[a] > cons_d) || (str[a] < cons_e && str[a] > cons_f)) && str[a] != '\0'){
-		a++;
-	}
-
-	if(a > 0){
-		if(str[a-1] == '-'){
-			neg = 1;
-			*len += 1;
-			str++;
-		}
-	}
-
-	str += a;
-
-	while(*str != '\0'){
-		if(*str >= cons_e && *str <= cons_f){
-			result += (*str - cons_e + 10) * base;
-			*len += 1;
-			str++;
-		} else if(*str >= cons_c && *str <= cons_d){
-			result += (*str - cons_c + 10) * base;
-			*len += 1;
-			str++;
-		} else if(*str >= cons_a && *str <= cons_b){
-			result += (*str - cons_a) * base;
-			*len += 1;
-			str++;
-		} else {
-			break;
-		}
-	}
-
-	if(neg){
-		result = result * -1;
-	}
-
-	return result;
+    if(i < len-1){
+    	*str = '\0';
+    }
 }
 
 /**
  * Converts a number to its equivalent with base 'base'
  * @param num: the integer to be converted
+ * @param ptr: the string where the number should be written to
  * @param base: the base for the converted number
- * @return: a pointer to a char array with the new number
  */
-char *convertToString(int num, int base) {
-    static char Representation[]= "0123456789ABCDEF";
-    static char buffer[128];
-    char *ptr;
+void convertUnsignedToString(unsigned int num, char *str, const int base, const int len){
+	static char Representation[]= "0123456789ABCDEF";
+	char buf[100];
 
-    unsigned int a = num;
+	buf[99] = '\0';
+	char *ptr = &buf[99];
 
-    ptr = &buffer[127];
-    *ptr = '\0';
+	unsigned int a = num;
 
-    if(base < 2 || base > 16){
-    	return ptr;
-    }
+	if(base < 2 || base > 16){
+		return;
+	}
 
-    if(num < 0){
-    	a = -1*num;
-    }
+	do {
+		*--ptr = Representation[a%base];
 
-    do {
-    	*--ptr = Representation[a%base];
-        a /= base;
-    } while(a != 0);
+		a /= base;
+	} while(a != 0 && ptr != buf);
 
-    return(ptr);
+	int i;
+	for(i = 0; ptr != &buf[99] && i < len-1; ptr++, str++, i++){
+		*str = *ptr;
+	}
+
+	if(i < len){
+		*str = '\0';
+	}
 }
 
 /**
  * Converts a double to a string
  * @param num: the double to be converted
- * @return: a pointer to a char array with the new number
+ * @param ptr: the string where the number should be written to
  */
-char *covertDoubleToString(double num){
-	int i = 0;
-	for(i = 0; i < LONG_MAX; i++){
-		if(num - i < 0){
-			break;
-		}
+void convertDoubleToString(const double num, char *str, const int len){
+	convertToString((int) num, str, 10, len);
+
+	int length_int = strlen(str);
+
+	str += length_int;
+	*str = '.';
+	str++;
+
+	double a = num;
+	double res = a - (int) a;
+
+	int i;
+	for(i = 0; a - (int) a != 0.0; i++, a *= 10, res *= 10){;}
+
+	if((int) res < (int) (res + 0.5)){
+		res = (int) res + 1;
 	}
 
-	char buffer[128];
-	char *ptr = buffer;
+	char buf[100];
+	convertToString((double) res, buf, 10, len - length_int);
 
-	double decimals = num - (double) i + 1.0;
-	int integers = i - 1;
-
-	char *high = convertToString(integers, 10);
-	int len = strlen(high);
-
-	for(i = 0; i < len; i++){
-		*ptr = high[i];
-		ptr++;
+	int d;
+	for(d = strlen(buf); d < i; d++){
+		*str = '0';
+		str++;
 	}
 
-	*ptr = '.';
-
-	for(i = 0; i < length; i++){
-		//TODO: Finish this,
+	for(i = 0; i < (len - length_int - (int) strlen(buf)) && i < 99; i++){
+		str[i] = buf[i];
 	}
-
 }
 
 static int print(const char* data, size_t length) {
@@ -169,14 +141,14 @@ int printf(const char* format, ...) {
 	int written = 0;
 
 	while(*format != '\0'){
-		size_t max_remaining = INT_MAX - written;
+		int max_remaining = INT_MAX - written;
 
 		if (format[0] != '%' || format[1] == '%') {
 			if (format[0] == '%'){
 				format++;
 			}
 
-			size_t format_len = 1;
+			int format_len = 1;
 
 			while (format[format_len] && format[format_len] != '%'){
 				format_len++;
@@ -202,7 +174,6 @@ int printf(const char* format, ...) {
 		int zero_padding = 0;
 		int prefix_enable = 0;
 		int min_length = 0;
-		int min_decimals = 0;
 
 
 		if(*format == '#'){
@@ -216,53 +187,61 @@ int printf(const char* format, ...) {
 		}
 
 		if(*format > '0' && *format <= '9'){
-			int numlen = 0;
-			min_length = convertToNumber(format, &numlen, 10);
+			min_length = atoi(format);
 
-			format += numlen;
+			for(; *format >= '0' && *format <= '9'; format++);
 		}
 
+		/*
 		if(*format == '.'){
 			format++;
 			if(*format > '0' && *format <= '9'){
-				int numlen = 0;
-				min_decimals = convertToNumber(format, &numlen, 10);
+				min_decimals = atoi(format);
 
-				format += numlen;
+				for(; *format >= '0' && *format <= '9'; format++);
 			}
-		}
+		}*/
 
 		if (*format == 'c') {
 			format++;
 			char c = (char) va_arg(parameters, int /* char promotes to int */);
+
 			if (!max_remaining) {
 				// TODO: Set errno to EOVERFLOW.
 				return -1;
 			}
-			if (!print(&c, sizeof(c)))
+
+			if (!print(&c, sizeof(c))){
 				return -1;
+			}
+
 			written++;
 		} else if (*format == 's') {
 			format++;
 			const char* str = va_arg(parameters, const char*);
-			size_t len = strlen(str);
+			int len = strlen(str);
+
 			if (max_remaining < len) {
 				// TODO: Set errno to EOVERFLOW.
 				return -1;
 			}
-			if (!print(str, len))
-				return -1;
-			written += len;
-		} else if (*format == 'X') {
-			format++;
-			int hex = va_arg(parameters, int);
 
-			const char *str = convertToString(hex, 16);
-			size_t len = strlen(str);
+			if (!print(str, len)){
+				return -1;
+			}
+
+			written += len;
+		} else if (*format == 'x') {
+			format++;
+			unsigned int hex = va_arg(parameters, unsigned int);
+
+			char str[99];
+			convertUnsignedToString(hex, str, 16, 99);
+			int len = strlen(str);
 
 			if(hex != 0 && prefix_enable){
 				if(max_remaining >= 2){
-					if (!print("0X", 2)){
+					if (!print("0x", 2)){
 						return -1;
 					}
 				} else {
@@ -313,8 +292,9 @@ int printf(const char* format, ...) {
 			format++;
 			int dec = va_arg(parameters, int);
 
-			const char *str = convertToString(dec, 10);
-			size_t len = strlen(str);
+			char str[99];
+			convertToString(dec, str, 10, 99);
+			int len = strlen(str);
 
 			if(len-1 > min_length){
 				int i = 0;
@@ -350,12 +330,13 @@ int printf(const char* format, ...) {
 			}
 
 			written += len;
-		} else if (*format == 'B') {
+		} else if (*format == 'b') {
 			format++;
-			int bin = va_arg(parameters, int);
+			unsigned int bin = va_arg(parameters, unsigned int);
 
-			const char *str = convertToString(bin, 2);
-			size_t len = strlen(str);
+			char str[99];
+			convertUnsignedToString(bin, str, 2, 99);
+			int len = strlen(str);
 
 			if(bin != 0 && prefix_enable){
 				if(max_remaining >= 2){
@@ -405,9 +386,51 @@ int printf(const char* format, ...) {
 				return -1;
 			}
 			written += len;
+		} else if (*format == 'f') {
+			format++;
+			double dec = va_arg(parameters, double);
+
+			char str[99];
+			convertDoubleToString(dec, str, 99);
+			int len = strlen(str);
+
+			if(len-1 > min_length){
+				int i = 0;
+				for(i = 0; i < (min_length - len + 1); i++){
+					if(max_remaining >= 1){
+						if(zero_padding){
+							if (!print("0", 1)){
+								return -1;
+							}
+						} else {
+							if (!print(" ", 1)){
+								return -1;
+							}
+						}
+
+						written++;
+					} else {
+						// TODO: Set errno to EOVERFLOW.
+						return -1;
+					}
+				}
+			}
+
+			max_remaining = INT_MAX - written;
+
+			if (max_remaining < len) {
+				// TODO: Set errno to EOVERFLOW.
+				return -1;
+			}
+
+			if (!print(str, len)){
+				return -1;
+			}
+
+			written += len;
 		} else {
 			format = format_begun_at;
-			size_t len = strlen(format);
+			int len = strlen(format);
 
 			if (max_remaining < len) {
 				// TODO: Set errno to EOVERFLOW.

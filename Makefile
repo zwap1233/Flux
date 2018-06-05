@@ -12,7 +12,7 @@ export BOOTDIR=/boot
 export LIBDIR:=$(PREFIX)/lib
 export INCLUDEDIR:=$(PREFIX)/include
 
-export CFLAGS:=-O2 -g -fstack-protector-all
+export CFLAGS:=-O0 -g -fstack-protector-all
 export CPPFLAGS:=-fno-exceptions -fno-rtti
 
 #inbuild vars
