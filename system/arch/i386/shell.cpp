@@ -5,7 +5,7 @@
  *      Author: wouter
  */
 
-#include <kernel/shell.h>
+#include <kernel/io/shell.h>
 #include <stdio.h>
 
 using namespace shell;

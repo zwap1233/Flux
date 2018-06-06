@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#include <kernel/shell.h>
+#include <kernel/io/shell.h>
 #include <kernel/memory/Paging.h>
 
 extern uint32_t ld_kernel_start;
@@ -30,11 +30,6 @@ extern "C" {
 	void mainKernel(void) {
 		shell::initialize(&ld_kernel_start, &ld_kernel_end);
 		printf("Hello, kernel World!\n");
-
-		printf("Test dec:%d\n", -1234);
-		printf("Test bin:%b\n", -12455);
-		printf("Test hex:%x\n", -13);
-		printf("Test float:%f\n", -1223.023242);
 	}
 }
 

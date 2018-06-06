@@ -56,7 +56,7 @@ $(ARCHDIR)/crtn.o \
 
 all: $(KERNFILE)
 
-$(KERNFILE): $(OBJS) $(ARCHDIR)/$(LINKER)
+$(KERNFILE): $(OBJS) $(ARCHDIR)/$(LINKER) FORCE
 	$(CC) -T $(ARCHDIR)/$(LINKER) -o $@ $(CFLAGS) $(LINK_LIST)
 
 $(ARCHDIR)/crtbegin.o $(ARCHDIR)/crtend.o:
@@ -70,6 +70,8 @@ $(ARCHDIR)/crtbegin.o $(ARCHDIR)/crtend.o:
 
 .S.o:
 	$(CC) -MD -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
+	
+FORCE:
 
 clean:
 	@rm -f $(KERNFILE)
