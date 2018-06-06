@@ -1,11 +1,11 @@
 export PROJECTS:=libk system
 
-export HOST=i686-elf
-export HOSTARCH:=$(shell if echo $(HOST) | grep -Eq 'i[[:digit:]]86-'; then echo i386; else echo $(HOST) | grep -Eo '^[[:alnum:]_]*'; fi)
+export HOST?=i686-elf
+export HOSTARCH=$(shell if echo $(HOST) | grep -Eq 'i[[:digit:]]86-'; then echo i386; else echo $(HOST) | grep -Eo '^[^-]*'; fi)
 
-export AR:=$(HOST)-ar
-export AS:=$(HOST)-as
-export CC:=$(HOST)-g++
+export AR=$(HOST)-ar
+export AS=$(HOST)-as
+export CC=$(HOST)-g++
 
 export PREFIX=/usr
 export BOOTDIR=/boot
@@ -31,7 +31,7 @@ export CC:=$(CC) --sysroot=$(SYSROOT)
 # because it was configured with --without-headers rather than --with-sysroot.
 export CC:=$(CC) -isystem=$(INCLUDEDIR)
 
-.PHONEY: all install clean install-iso
+.PHONEY: all install clean install-arm install-i686 install-iso
 
 all: install
 	
@@ -50,7 +50,13 @@ install: sysroot
 	if [ "$$?" -eq "1" ] ; then \
 		echo 'ERROR: Kernel file is not multiboot'; \
 	fi;
-	
+
+install-arm: HOST=arm-none-eabi
+install-arm: install
+
+install-i686: HOST=i686-elf
+install-i686: install
+
 install-iso: install
 	@mkdir -p $(ISODIR)
 	@mkdir -p $(ISODIR)/boot

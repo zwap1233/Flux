@@ -28,8 +28,8 @@ extern "C" {
 	 * Starting point for the kernel
 	 */
 	void mainKernel(void) {
-		shell::initialize(&ld_kernel_start, &ld_kernel_end);
-		printf("Hello, kernel World!\n");
+		//shell::initialize(&ld_kernel_start, &ld_kernel_end);
+		//printf("Hello, kernel World!\n");
 	}
 }
 
