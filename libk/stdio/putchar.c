@@ -2,7 +2,7 @@
 #include <stdio.h>
 
 #if defined(__is_libk)
-	#include <kernel/io/shell.h>
+	#include <kernel/io/vga.h>
 #endif
 
 int putchar(int ic) {

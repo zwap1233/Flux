@@ -1,7 +1,7 @@
 #Libk makefile
 
 HOST?=i686-elf
-HOSTARCH:=$(shell if echo $(HOST) | grep -Eq 'i[[:digit:]]86-'; then echo i386; else echo $(HOST) | grep -Eo '^[[:alnum:]_]*'; fi)
+HOSTARCH?=$(shell if echo $(HOST) | grep -Eq 'i[[:digit:]]86-'; then echo i386; else echo $(HOST) | grep -Eo '^[[:alnum:]_]*'; fi)
 
 CFLAGS?=-O2 -g
 CPPFLAGS?=
@@ -22,10 +22,10 @@ WARNINGS:=  -Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align \
             -Wredundant-decls -Winline -Wno-long-long \
             -Wuninitialized -Wconversion
 
-CFLAGS:=$(CFLAGS) -ffreestanding $(WARNINGS) $(ARCH_CFLAGS)
-CPPFLAGS:=$(CPPFLAGS) -D__is_libc -Iinclude $(ARCH_CPPFLAGS)
-LIBK_CFLAGS:=$(CFLAGS) $(KERNEL_ARCH_CFLAGS)
-LIBK_CPPFLAGS:=$(CPPFLAGS) -D__is_libk $(KERNEL_ARCH_CPPFLAGS)
+CFLAGS:=$(CFLAGS) -ffreestanding -D__is_libc -Iinclude $(WARNINGS) $(ARCH_CFLAGS)
+CPPFLAGS:=$(CPPFLAGS) $(ARCH_CPPFLAGS)
+LIBK_CFLAGS:=$(CFLAGS) -D__is_libk $(KERNEL_ARCH_CFLAGS)
+LIBK_CPPFLAGS:=$(CPPFLAGS) $(KERNEL_ARCH_CPPFLAGS)
 
 FREESRC:=$(patsubst ./%, %, $(shell find -name *.c -not -path arch))
 FREEOBJS:=$(ARCH_FREEOBJS) $(FREESRC:.c=.o) 
@@ -54,16 +54,16 @@ libk.a: $(LIBK_OBJS)
 	$(AR) rcs $@ $(LIBK_OBJS)
 
 .c.o:
-	$(CC) -MD -c $< -o $@ $(CFLAGS) $(CPPFLAGS) -std=gnu11
+	$(CC) -MD -c $< -o $@ $(CFLAGS) -std=gnu11
 
 .c.S:
-	$(CC) -MD -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
+	$(CC) -MD -c $< -o $@ $(CFLAGS)
 
 .c.libk.o:
-	$(CC) -MD -c $< -o $@ $(LIBK_CFLAGS) $(LIBK_CPPFLAGS)
+	$(CC) -MD -c $< -o $@ $(LIBK_CFLAGS)
 
 .S.libk.o:
-	$(CC) -MD -c $< -o $@ $(LIBK_CFLAGS) $(LIBK_CPPFLAGS)
+	$(CC) -MD -c $< -o $@ $(LIBK_CFLAGS)
 
 clean:	
 	@rm -f $(BINARIES) *.a

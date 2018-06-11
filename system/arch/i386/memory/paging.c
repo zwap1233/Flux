@@ -5,7 +5,7 @@
  *      Author: wouter
  */
 
-#include <kernel/memory/Paging.h>
+#include <kernel/memory/paging.h>
 
 //Entire pageing structure can be read from this point
 extern uint64_t boot_pagepointer[4];
@@ -65,7 +65,7 @@ uint64_t paging_allocPage(){
  * @param pages		Amount of pages to be allocated
  * @return			physical address of allocated page
  */
-uint64_t paging_allocPage(int pages){
+uint64_t paging_allocPages(int pages){
 	return 0;
 }
 

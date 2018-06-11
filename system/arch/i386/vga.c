@@ -6,9 +6,9 @@
  */
 
 #include <stdio.h>
-#include <vga.h>
+#include <kernel/io/vga.h>
 
-static uint8_t vga_entry_color(enum shell_color fg, enum shell_color bg) {
+static uint8_t vga_entry_color(enum vga_color fg, enum vga_color bg) {
 	return (uint8_t) fg | bg << 4;
 }
 
@@ -20,36 +20,39 @@ static const size_t VGA_WIDTH = 80;
 static const size_t VGA_HEIGHT = 25;
 static const uint16_t* VGA_MEMORY = (uint16_t*) 0xC00B8000;
 
-static uint16_t* vga_buffer = (uint16_t *) VGA_MEMORY;	//offset terminal by one line
+uint16_t* term_buffer = 0;	//offset terminal by one line
 
 static volatile enum vga_color foregroundcolor = LIGHT_GREY;
 static volatile enum vga_color backgroundcolor = BLACK;
 
-static volatile int shell_x = 0;
-static volatile int shell_y = 0;
+static volatile int cursor_x = 0;
+static volatile int cursor_y = 0;
 
-static const int SHELL_WIDTH = VGA_WIDTH;
-static const int SHELL_HEIGHT = VGA_HEIGHT - 2;
+#define TERM_WIDTH VGA_WIDTH
+#define TERM_HEIGHT (VGA_HEIGHT - 2)
 
 /**
  * Initialize the shell should be called only once by the kernel after the global constructors
  */
 void vga_init(uint32_t *kernel_start, uint32_t *kernel_end) {
+
+	term_buffer = VGA_MEMORY;
+
 	for (size_t y = 0; y < VGA_HEIGHT; y++) {
 		for (size_t x = 0; x < VGA_WIDTH; x++) {
 			const size_t index = y * VGA_WIDTH + x;
-			vga_buffer[index] = vga_entry(' ', vga_entry_color(foregroundcolor, backgroundcolor));
+			term_buffer[index] = vga_entry(' ', vga_entry_color(foregroundcolor, backgroundcolor));
 		}
 	}
 
 	setForegroundColor(LIGHT_GREEN);
 	writeString("FluxOS version 0.0.1");
 
-	shell_x = 0;
-	shell_y = VGA_HEIGHT - 1;
+	cursor_x = 0;
+	cursor_y = VGA_HEIGHT - 1;
 	printf("Start: %#x                   End: %#x", kernel_start, kernel_end);
 
-	vga_buffer = (uint16_t *) VGA_MEMORY + VGA_WIDTH;
+	term_buffer = (uint16_t *) VGA_MEMORY + VGA_WIDTH;
 	setCursor(0,0);
 	setForegroundColor(LIGHT_GREY);
 }
@@ -63,9 +66,9 @@ void vga_init(uint32_t *kernel_start, uint32_t *kernel_end) {
  * @param x
  * @param y
  */
-void vga_putentryat(unsigned char c, enum shell_color fgcolor, enum shell_color bgcolor, size_t x, size_t y) {
+void vga_putentryat(unsigned char c, enum vga_color fgcolor, enum vga_color bgcolor, size_t x, size_t y) {
 	const size_t index = y * VGA_WIDTH + x;
-	vga_buffer[index] = vga_entry(c, vga_entry_color(fgcolor, bgcolor));
+	term_buffer[index] = vga_entry(c, vga_entry_color(fgcolor, bgcolor));
 }
 
 /**
@@ -89,17 +92,17 @@ void vga_putchar(char c) {
 	unsigned char uc = (unsigned char) c;
 
 	if(c != '\n' && c != '\r' && c != '\0'){
-		putentryat(uc, foregroundcolor, backgroundcolor, shell_x, shell_y);
+		putentryat(uc, foregroundcolor, backgroundcolor, cursor_x, cursor_y);
 
-		if((shell_x++) >= SHELL_WIDTH){
-			shell_x = 0;
-			if((shell_y++) >= (SHELL_HEIGHT - 1)){
+		if((cursor_x++) >= TERM_WIDTH){
+			cursor_x = 0;
+			if((cursor_y++) >= (TERM_HEIGHT - 1)){
 				scroll(1);
 			}
 		}
 	} else if(c == '\n' || c == '\r'){
-		shell_x = 0;
-		if((shell_y++) >= (SHELL_HEIGHT - 1)){
+		cursor_x = 0;
+		if((cursor_y++) >= (TERM_HEIGHT - 1)){
 			scroll(1);
 		}
 	}
@@ -134,7 +137,7 @@ void vga_writeString(const char* data) {
  */
 void vga_scroll(size_t rows){
 	//TODO: write vga_scroll function body
-	shell_y = 0;
+	cursor_y = 0;
 }
 
 /**
@@ -144,9 +147,9 @@ void vga_scroll(size_t rows){
  * @param y
  */
 void vga_setCursor(size_t x, size_t y){
-	if(y < SHELL_HEIGHT && x < SHELL_WIDTH){
-		shell_x = x;
-		shell_y = y;
+	if(y < TERM_HEIGHT && x < TERM_WIDTH){
+		cursor_y = x;
+		cursor_y = y;
 	}
 }
 

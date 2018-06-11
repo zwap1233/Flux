@@ -22,8 +22,8 @@ WARNINGS:=  -Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align \
             -Wredundant-decls -Winline -Wno-long-long \
             -Wuninitialized -Wconversion
 
-CFLAGS:=$(CFLAGS) -ffreestanding $(WARNINGS) $(KERNEL_ARCH_CFLAGS)
-CPPFLAGS:=$(CPPFLAGS) -D__is_kernel -Iinclude $(KERNEL_ARCH_CPPFLAGS)
+CFLAGS:=$(CFLAGS) -ffreestanding -D__is_kernel -Iinclude $(WARNINGS) $(KERNEL_ARCH_CFLAGS)
+CPPFLAGS:=$(CPPFLAGS) $(KERNEL_ARCH_CPPFLAGS)
 LDFLAGS:=$(LDFLAGS) $(KERNEL_ARCH_LDFLAGS)
 LIBS:=$(LIBS) -nostdlib -lk -lgcc $(KERNEL_ARCH_LIBS)
 
@@ -58,7 +58,7 @@ $(PREFIX_ENTRIES) \
 .PHONY: all clean install install-headers install-binairies
 .SUFFIXES: .o .c .cpp .S
 
-all: $(KERNFILE)
+all: $(OBJS) $(ARCHDIR)/$(LINKER)
 
 $(KERNFILE): $(OBJS) $(ARCHDIR)/$(LINKER) FORCE
 	$(CC) -T $(ARCHDIR)/$(LINKER) -o $@ $(CFLAGS) $(LINK_LIST)
@@ -67,13 +67,13 @@ $(ARCHDIR)/crtbegin.o $(ARCHDIR)/crtend.o:
 	@OBJ=`$(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=$(@F)` && cp "$$OBJ" $@
 
 .c.o:
-	$(CC) -MD -c $< -o $@ $(CFLAGS) $(CPPFLAGS) -std=gnu11
+	$(CC) -MD -c $< -o $@ $(CFLAGS) -std=gnu11
 
 .cpp.o:
 	$(CC) -MD -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
 
 .S.o:
-	$(CC) -MD -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
+	$(CC) -MD -c $< -o $@ $(CFLAGS)
 	
 FORCE:
 
@@ -86,11 +86,6 @@ install: install-headers install-binairies
 
 install-headers:
 	@echo 'Install sys headers'
-	@echo $(HOST)
-	@echo $(HOSTARCH)
-	@echo $(CC)
-	@echo $(AR)
-	@echo $(AS)
 	@mkdir -p $(DESTDIR)$(INCLUDEDIR)
 	@cp -R --preserve=timestamps include/. $(DESTDIR)$(INCLUDEDIR)/.
 

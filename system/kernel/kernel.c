@@ -4,8 +4,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#include <kernel/memory/Paging.h>
-#include "../include/kernel/io/vga.h"
+#include <kernel/io/vga.h>
+#include <kernel/memory/paging.h>
 
 extern uint32_t ld_kernel_start;
 extern uint32_t ld_kernel_end;

@@ -11,6 +11,6 @@
 __attribute__((noreturn))
 void panic(const char *msg);
 
-extern "C" void __stack_chk_guard_setup();
+extern void __stack_chk_guard_setup();
 
 #endif /* SYSTEM_INCLUDE_KERNEL_H_ */
