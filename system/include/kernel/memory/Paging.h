@@ -9,21 +9,19 @@
 #include <stddef.h>
 #include <stdint.h>
 
-namespace memory {
 
-	void initializePaging();
+void paging_init();
 
-	uint64_t getPhysicalAddress(uint32_t virt);
+uint64_t paging_getPhysicalAddress(uint32_t virt);
 
-	uint64_t allocPage();
+uint64_t paging_allocPage();
 
-	uint64_t allocPage(int pages);
+uint64_t paging_allocPage(int pages);
 
-	void setPageEntry(uint64_t phys, uint32_t virt, bool RW, bool US, bool PWT, bool PCD, bool Global);
+void paging_setPageEntry(uint64_t phys, uint32_t virt, int RW, int US, int PWT, int PCD, int Global);
 
-	void setPageAddr(uint64_t phys, uint32_t virt);
+void paging_setPageAddr(uint64_t phys, uint32_t virt);
 
-	void setPageFlags(uint32_t virt, bool RW, bool US, bool PWT, bool PCD, bool Global);
-}
+void paging_setPageFlags(uint32_t virt, int RW, int US, int PWT, int PCD, int Global);
 
 

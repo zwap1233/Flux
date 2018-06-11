@@ -5,10 +5,8 @@
  *      Author: wouter
  */
 
-#include <kernel/io/shell.h>
 #include <stdio.h>
-
-using namespace shell;
+#include <vga.h>
 
 static uint8_t vga_entry_color(enum shell_color fg, enum shell_color bg) {
 	return (uint8_t) fg | bg << 4;
@@ -24,8 +22,8 @@ static const uint16_t* VGA_MEMORY = (uint16_t*) 0xC00B8000;
 
 static uint16_t* vga_buffer = (uint16_t *) VGA_MEMORY;	//offset terminal by one line
 
-static volatile enum shell::shell_color foregroundcolor = LIGHT_GREY;
-static volatile enum shell::shell_color backgroundcolor = BLACK;
+static volatile enum vga_color foregroundcolor = LIGHT_GREY;
+static volatile enum vga_color backgroundcolor = BLACK;
 
 static volatile int shell_x = 0;
 static volatile int shell_y = 0;
@@ -36,7 +34,7 @@ static const int SHELL_HEIGHT = VGA_HEIGHT - 2;
 /**
  * Initialize the shell should be called only once by the kernel after the global constructors
  */
-void shell::initialize(uint32_t *kernel_start, uint32_t *kernel_end) {
+void vga_init(uint32_t *kernel_start, uint32_t *kernel_end) {
 	for (size_t y = 0; y < VGA_HEIGHT; y++) {
 		for (size_t x = 0; x < VGA_WIDTH; x++) {
 			const size_t index = y * VGA_WIDTH + x;
@@ -65,7 +63,7 @@ void shell::initialize(uint32_t *kernel_start, uint32_t *kernel_end) {
  * @param x
  * @param y
  */
-void shell::putentryat(unsigned char c, enum shell_color fgcolor, enum shell_color bgcolor, size_t x, size_t y) {
+void vga_putentryat(unsigned char c, enum shell_color fgcolor, enum shell_color bgcolor, size_t x, size_t y) {
 	const size_t index = y * VGA_WIDTH + x;
 	vga_buffer[index] = vga_entry(c, vga_entry_color(fgcolor, bgcolor));
 }
@@ -77,7 +75,7 @@ void shell::putentryat(unsigned char c, enum shell_color fgcolor, enum shell_col
  * @param x
  * @param y
  */
-void shell::putcharat(char c, size_t x, size_t y) {
+void vga_putcharat(char c, size_t x, size_t y) {
 	setCursor(x, y);
 	putchar(c);
 }
@@ -87,7 +85,7 @@ void shell::putcharat(char c, size_t x, size_t y) {
  *
  * @param c
  */
-void shell::putchar(char c) {
+void vga_putchar(char c) {
 	unsigned char uc = (unsigned char) c;
 
 	if(c != '\n' && c != '\r' && c != '\0'){
@@ -113,7 +111,7 @@ void shell::putchar(char c) {
  * @param data
  * @param size
  */
-void shell::write(const char* data, size_t size) {
+void vga_write(const char* data, size_t size) {
 	for (size_t i = 0; i < size; i++){
 		putchar(data[i]);
 	}
@@ -124,7 +122,7 @@ void shell::write(const char* data, size_t size) {
  *
  * @param data
  */
-void shell::writeString(const char* data) {
+void vga_writeString(const char* data) {
 	write(data, strlen(data));
 }
 
@@ -134,8 +132,8 @@ void shell::writeString(const char* data) {
  *
  * @param rows
  */
-void shell::scroll(size_t rows){
-	//TODO: write shell::scroll function body
+void vga_scroll(size_t rows){
+	//TODO: write vga_scroll function body
 	shell_y = 0;
 }
 
@@ -145,7 +143,7 @@ void shell::scroll(size_t rows){
  * @param x
  * @param y
  */
-void shell::setCursor(size_t x, size_t y){
+void vga_setCursor(size_t x, size_t y){
 	if(y < SHELL_HEIGHT && x < SHELL_WIDTH){
 		shell_x = x;
 		shell_y = y;
@@ -158,7 +156,7 @@ void shell::setCursor(size_t x, size_t y){
  * @param fg
  * @param bg
  */
-void shell::setColor(enum shell::shell_color fg, enum shell::shell_color bg){
+void vga_setColor(enum vga_color fg, enum vga_color bg){
 	foregroundcolor = fg;
 	backgroundcolor = bg;
 }
@@ -168,7 +166,7 @@ void shell::setColor(enum shell::shell_color fg, enum shell::shell_color bg){
  *
  * @param color
  */
-void shell::setBackgroundColor(enum shell::shell_color color){
+void vga_setBackgroundColor(enum vga_color color){
 	backgroundcolor = color;
 }
 
@@ -177,7 +175,7 @@ void shell::setBackgroundColor(enum shell::shell_color color){
  *
  * @param color
  */
-void shell::setForegroundColor(enum shell::shell_color color){
+void vga_setForegroundColor(enum vga_color color){
 	foregroundcolor = color;
 }
 
@@ -186,7 +184,7 @@ void shell::setForegroundColor(enum shell::shell_color color){
  *
  * @return
  */
-enum shell::shell_color shell::getBackgroundColor(){
+enum vga_color vga_getBackgroundColor(){
 	return backgroundcolor;
 }
 
@@ -195,7 +193,7 @@ enum shell::shell_color shell::getBackgroundColor(){
  *
  * @return
  */
-enum shell::shell_color shell::getForegroundColor(){
+enum vga_color vga_getForegroundColor(){
 	return foregroundcolor;
 }
 
