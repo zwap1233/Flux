@@ -35,28 +35,32 @@ C_OBJS:=$(shell find kernel -name *.c)
 CPP_OBJS:=$(shell find kernel -name *.cpp)
 KERNEL_OBJS:=$(C_OBJS:.c=.o) $(CPP_OBJS:.cpp=.o) $(KERNEL_ARCH_OBJS)
 
-OBJS=\
-$(ARCHDIR)/crti.o \
-$(ARCHDIR)/crtbegin.o \
-$(KERNEL_OBJS) \
+PREFIX_ENTRIES?=\
 $(ARCHDIR)/crtend.o \
 $(ARCHDIR)/crtn.o \
 
-LINK_LIST=\
-$(LDFLAGS) \
+SUFFIX_ENTRIES?=\
 $(ARCHDIR)/crti.o \
 $(ARCHDIR)/crtbegin.o \
+
+OBJS=\
+$(SUFFIX_ENTRIES) \
+$(KERNEL_OBJS) \
+$(PREFIX_ENTRIES) \
+
+LINK_LIST=\
+$(LDFLAGS) \
+$(SUFFIX_ENTRIES) \
 $(KERNEL_OBJS) \
 $(LIBS) \
-$(ARCHDIR)/crtend.o \
-$(ARCHDIR)/crtn.o \
+$(PREFIX_ENTRIES) \
 
 .PHONY: all clean install install-headers install-binairies
 .SUFFIXES: .o .c .cpp .S
 
 all: $(KERNFILE)
 
-$(KERNFILE): $(OBJS) $(ARCHDIR)/$(LINKER)
+$(KERNFILE): $(OBJS) $(ARCHDIR)/$(LINKER) FORCE
 	$(CC) -T $(ARCHDIR)/$(LINKER) -o $@ $(CFLAGS) $(LINK_LIST)
 
 $(ARCHDIR)/crtbegin.o $(ARCHDIR)/crtend.o:
@@ -70,6 +74,8 @@ $(ARCHDIR)/crtbegin.o $(ARCHDIR)/crtend.o:
 
 .S.o:
 	$(CC) -MD -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
+	
+FORCE:
 
 clean:
 	@rm -f $(KERNFILE)
@@ -80,11 +86,16 @@ install: install-headers install-binairies
 
 install-headers:
 	@echo 'Install sys headers'
+	@echo $(HOST)
+	@echo $(HOSTARCH)
+	@echo $(CC)
+	@echo $(AR)
+	@echo $(AS)
 	@mkdir -p $(DESTDIR)$(INCLUDEDIR)
 	@cp -R --preserve=timestamps include/. $(DESTDIR)$(INCLUDEDIR)/.
 
 install-binairies: $(KERNFILE)
-	@echo 'Install sys'
+	@echo 'Installed kernel'
 	@mkdir -p $(DESTDIR)$(BOOTDIR)
 	@cp $(KERNFILE) $(DESTDIR)$(BOOTDIR)
 

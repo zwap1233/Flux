@@ -78,7 +78,7 @@ install-headers:
 	@cp -R --preserve=timestamps include/. $(DESTDIR)$(INCLUDEDIR)/.
 
 install-binairies: $(BINARIES)
-	@echo 'Install lib'
+	@echo 'Installed libk'
 	@mkdir -p $(DESTDIR)$(LIBDIR)
 	@cp $(BINARIES) $(DESTDIR)$(LIBDIR)
 

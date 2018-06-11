@@ -36,29 +36,6 @@ namespace shell {
 			WHITE = 15,
 		};
 
-		static inline uint8_t vga_entry_color(enum shell_color fg, enum shell_color bg) {
-			return (uint8_t) fg | bg << 4;
-		}
-
-		static inline uint16_t vga_entry(unsigned char uc, uint8_t color) {
-			return (uint16_t) uc | (uint16_t) color << 8;
-		}
-
-		static const size_t VGA_WIDTH = 80;
-		static const size_t VGA_HEIGHT = 25;
-		static const uint16_t* VGA_MEMORY = (uint16_t*) 0xC00B8000;
-
-		static uint16_t* vga_buffer = (uint16_t *) VGA_MEMORY;	//offset terminal by one line
-
-		static volatile enum shell::shell_color foregroundcolor = LIGHT_GREY;
-		static volatile enum shell::shell_color backgroundcolor = BLACK;
-
-		static volatile int shell_x = 0;
-		static volatile int shell_y = 0;
-
-		static const int SHELL_WIDTH = VGA_WIDTH;
-		static const int SHELL_HEIGHT = VGA_HEIGHT - 2;
-
 		void initialize(uint32_t *kernel_start, uint32_t *kernel_end);
 
 		void putentryat(unsigned char c, enum shell::shell_color foregroundcolor, enum shell::shell_color backgroundcolor, size_t x, size_t y);

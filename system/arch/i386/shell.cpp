@@ -5,10 +5,33 @@
  *      Author: wouter
  */
 
-#include <kernel/shell.h>
+#include <kernel/io/shell.h>
 #include <stdio.h>
 
 using namespace shell;
+
+static uint8_t vga_entry_color(enum shell_color fg, enum shell_color bg) {
+	return (uint8_t) fg | bg << 4;
+}
+
+static uint16_t vga_entry(unsigned char uc, uint8_t color) {
+	return (uint16_t) uc | (uint16_t) color << 8;
+}
+
+static const size_t VGA_WIDTH = 80;
+static const size_t VGA_HEIGHT = 25;
+static const uint16_t* VGA_MEMORY = (uint16_t*) 0xC00B8000;
+
+static uint16_t* vga_buffer = (uint16_t *) VGA_MEMORY;	//offset terminal by one line
+
+static volatile enum shell::shell_color foregroundcolor = LIGHT_GREY;
+static volatile enum shell::shell_color backgroundcolor = BLACK;
+
+static volatile int shell_x = 0;
+static volatile int shell_y = 0;
+
+static const int SHELL_WIDTH = VGA_WIDTH;
+static const int SHELL_HEIGHT = VGA_HEIGHT - 2;
 
 /**
  * Initialize the shell should be called only once by the kernel after the global constructors
@@ -26,7 +49,7 @@ void shell::initialize(uint32_t *kernel_start, uint32_t *kernel_end) {
 
 	shell_x = 0;
 	shell_y = VGA_HEIGHT - 1;
-	printf("Start: 0x%x                   End: 0x%x", kernel_start, kernel_end);
+	printf("Start: %#x                   End: %#x", kernel_start, kernel_end);
 
 	vga_buffer = (uint16_t *) VGA_MEMORY + VGA_WIDTH;
 	setCursor(0,0);
@@ -42,9 +65,9 @@ void shell::initialize(uint32_t *kernel_start, uint32_t *kernel_end) {
  * @param x
  * @param y
  */
-void shell::putentryat(unsigned char c, enum shell_color foregroundcolor, enum shell_color backgroundcolor, size_t x, size_t y) {
+void shell::putentryat(unsigned char c, enum shell_color fgcolor, enum shell_color bgcolor, size_t x, size_t y) {
 	const size_t index = y * VGA_WIDTH + x;
-	vga_buffer[index] = vga_entry(c, vga_entry_color(foregroundcolor, backgroundcolor));
+	vga_buffer[index] = vga_entry(c, vga_entry_color(fgcolor, bgcolor));
 }
 
 /**
