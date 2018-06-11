@@ -9,9 +9,10 @@ export HOST
 
 export HOSTARCH=$(shell if echo $(HOST) | grep -Eq 'i[[:digit:]]86-'; then echo i386; else echo $(HOST) | grep -Eo '^[^-]*'; fi)
 
+#only c no c++
 export AR=$(HOST)-ar
 export AS=$(HOST)-as
-export CC=$(HOST)-g++
+export CC=$(HOST)-gcc
 
 export PREFIX=/usr
 export BOOTDIR=/boot
