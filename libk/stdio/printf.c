@@ -144,7 +144,7 @@ char *covertDoubleToString(double num){
 
 	*ptr = '.';
 
-	for(i = 0; i < length; i++){
+	for(i = 0; i < len; i++){
 		//TODO: Finish this,
 	}
 
