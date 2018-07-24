@@ -4,16 +4,17 @@ HOST?=i686-elf
 HOSTARCH?=$(shell if echo $(HOST) | grep -Eq 'i[[:digit:]]86-'; then echo i386; else echo $(HOST) | grep -Eo '^[[:alnum:]_]*'; fi)
 
 CFLAGS?=-O2 -g
-CPPFLAGS?=
+CPPFLAGS?=-fno-exceptions -fno-rtti
 LDFLAGS?=
 LIBS?=
 
 DESTDIR?=$(HOME)/sysroot
 PREFIX?=/usr
+SUFFIX?=/libk
 LIBDIR?=$(PREFIX)/lib
-INCLUDEDIR?=$(PREFIX)/include
+INCLUDEDIR?=$(PREFIX)/include$(SUFFIX)
 
-ARCHDIR=arch/i386
+ARCHDIR=arch/$(HOSTARCH)
 
 include $(ARCHDIR)/make.config
 
@@ -39,36 +40,39 @@ $(HOSTEDOBJS) \
 
 LIBK_OBJS=$(FREEOBJS:.o=.libk.o)
 
+LIBK_FILE:=$(DESTDIR)$(LIBDIR)/libk.a
+LIBC_FILE:=$(DESTDIR)$(LIBDIR)/libc.a
 #BINARIES=libc.a libk.a # Not ready for libc yet.
-BINARIES=libk.a
+BINARIES=$(LIBK_FILE)
 
 .PHONY: all clean install install-headers install-binairies
-.SUFFIXES: .o .libk.o .c .S
 
 all: $(BINARIES)
 
-libc.a: $(OBJS)
+$(LIBC_FILE): $(OBJS)
+	@mkdir -p $(DESTDIR)$(LIBDIR)
 	$(AR) rcs $@ $(OBJS)
 
-libk.a: $(LIBK_OBJS)
+$(LIBK_FILE): $(LIBK_OBJS)
+	@mkdir -p $(DESTDIR)$(LIBDIR)
 	$(AR) rcs $@ $(LIBK_OBJS)
 
-.c.o:
+%.o: %.c
 	$(CC) -MD -c $< -o $@ $(CFLAGS) -std=gnu11
 
-.c.S:
+%.S: %.c
 	$(CC) -MD -c $< -o $@ $(CFLAGS)
 
-.c.libk.o:
+%.libk.o: %.c
 	$(CC) -MD -c $< -o $@ $(LIBK_CFLAGS)
 
-.S.libk.o:
+%.libk.o: %.S
 	$(CC) -MD -c $< -o $@ $(LIBK_CFLAGS)
 
 clean:	
 	@rm -f $(BINARIES) *.a
-	@rm -f $(OBJS) $(LIBK_OBJS) *.o */*.o */*/*.o
-	@rm -f $(OBJS:.o=.d) $(LIBK_OBJS:.o=.d) *.d */*.d */*/*.d
+	@rm -f $(OBJS) $(LIBK_OBJS)
+	@rm -f $(OBJS:.o=.d) $(LIBK_OBJS:.o=.d)
 
 install: install-headers install-binairies
 
@@ -79,8 +83,6 @@ install-headers:
 
 install-binairies: $(BINARIES)
 	@echo 'Installed libk'
-	@mkdir -p $(DESTDIR)$(LIBDIR)
-	@cp $(BINARIES) $(DESTDIR)$(LIBDIR)
 
 -include $(OBJS:.o=.d)
 -include $(LIBK_OBJS:.o=.d)

@@ -6,7 +6,7 @@
  */
 
 #include <stdio.h>
-#include <kernel/io/vga.h>
+#include <core/vga.h>
 
 static uint8_t vga_entry_color(enum vga_color fg, enum vga_color bg) {
 	return (uint8_t) fg | bg << 4;
@@ -25,8 +25,8 @@ uint16_t* term_buffer = 0;	//offset terminal by one line
 static volatile enum vga_color foregroundcolor = LIGHT_GREY;
 static volatile enum vga_color backgroundcolor = BLACK;
 
-static volatile int cursor_x = 0;
-static volatile int cursor_y = 0;
+static volatile size_t cursor_x = 0;
+static volatile size_t cursor_y = 0;
 
 #define TERM_WIDTH VGA_WIDTH
 #define TERM_HEIGHT (VGA_HEIGHT - 2)
@@ -36,7 +36,7 @@ static volatile int cursor_y = 0;
  */
 void vga_init(uint32_t *kernel_start, uint32_t *kernel_end) {
 
-	term_buffer = VGA_MEMORY;
+	term_buffer = (uint16_t*) VGA_MEMORY;
 
 	for (size_t y = 0; y < VGA_HEIGHT; y++) {
 		for (size_t x = 0; x < VGA_WIDTH; x++) {
@@ -45,16 +45,16 @@ void vga_init(uint32_t *kernel_start, uint32_t *kernel_end) {
 		}
 	}
 
-	setForegroundColor(LIGHT_GREEN);
-	writeString("FluxOS version 0.0.1");
+	vga_setForegroundColor(LIGHT_GREEN);
+	vga_writeString("FluxOS version 0.0.1");
 
 	cursor_x = 0;
 	cursor_y = VGA_HEIGHT - 1;
 	printf("Start: %#x                   End: %#x", kernel_start, kernel_end);
 
 	term_buffer = (uint16_t *) VGA_MEMORY + VGA_WIDTH;
-	setCursor(0,0);
-	setForegroundColor(LIGHT_GREY);
+	vga_setCursor(0,0);
+	vga_setForegroundColor(LIGHT_GREY);
 }
 
 /**
@@ -79,8 +79,8 @@ void vga_putentryat(unsigned char c, enum vga_color fgcolor, enum vga_color bgco
  * @param y
  */
 void vga_putcharat(char c, size_t x, size_t y) {
-	setCursor(x, y);
-	putchar(c);
+	vga_setCursor(x, y);
+	vga_putchar(c);
 }
 
 /**
@@ -92,18 +92,18 @@ void vga_putchar(char c) {
 	unsigned char uc = (unsigned char) c;
 
 	if(c != '\n' && c != '\r' && c != '\0'){
-		putentryat(uc, foregroundcolor, backgroundcolor, cursor_x, cursor_y);
+		vga_putentryat(uc, foregroundcolor, backgroundcolor, cursor_x, cursor_y);
 
 		if((cursor_x++) >= TERM_WIDTH){
 			cursor_x = 0;
 			if((cursor_y++) >= (TERM_HEIGHT - 1)){
-				scroll(1);
+				vga_scroll(1);
 			}
 		}
 	} else if(c == '\n' || c == '\r'){
 		cursor_x = 0;
 		if((cursor_y++) >= (TERM_HEIGHT - 1)){
-			scroll(1);
+			vga_scroll(1);
 		}
 	}
 }
@@ -116,7 +116,7 @@ void vga_putchar(char c) {
  */
 void vga_write(const char* data, size_t size) {
 	for (size_t i = 0; i < size; i++){
-		putchar(data[i]);
+		vga_putchar(data[i]);
 	}
 }
 
@@ -126,7 +126,7 @@ void vga_write(const char* data, size_t size) {
  * @param data
  */
 void vga_writeString(const char* data) {
-	write(data, strlen(data));
+	vga_write(data, strlen(data));
 }
 
 /**
@@ -136,8 +136,12 @@ void vga_writeString(const char* data) {
  * @param rows
  */
 void vga_scroll(size_t rows){
-	//TODO: write vga_scroll function body
-	cursor_y = 0;
+	cursor_y -= rows;
+
+	uint16_t *from = term_buffer + VGA_WIDTH * rows;
+
+	memcpy(term_buffer, from, sizeof(uint16_t) * VGA_WIDTH * (TERM_HEIGHT - rows));
+	memset(term_buffer + VGA_WIDTH * (TERM_HEIGHT - rows), 0, sizeof(uint16_t) * VGA_WIDTH * rows);
 }
 
 /**

@@ -1,4 +1,4 @@
-#system makefile
+#kernel makefile
 
 HOST?=i686-elf
 HOSTARCH?=$(shell if echo $(HOST) | grep -Eq 'i[[:digit:]]86-'; then echo i386; else echo $(HOST) | grep -Eo '^[[:alnum:]_]*'; fi)
@@ -10,8 +10,11 @@ LIBS?=
 
 DESTDIR?=$(HOME)/sysroot
 PREFIX?=/usr
+SUFFIX?=
 BOOTDIR?=/boot
-INCLUDEDIR?=$(PREFIX)/include
+INCLUDEDIR?=$(PREFIX)/include$(SUFFIX)
+
+LIBK:=$(shell find $(DESTDIR) -name libk.a)
 
 ARCHDIR=arch/$(HOSTARCH)
 
@@ -22,8 +25,8 @@ WARNINGS:=  -Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align \
             -Wredundant-decls -Winline -Wno-long-long \
             -Wuninitialized -Wconversion
 
-CFLAGS:=$(CFLAGS) -ffreestanding $(WARNINGS) $(KERNEL_ARCH_CFLAGS)
-CPPFLAGS:=$(CPPFLAGS) -D__is_kernel -Iinclude $(KERNEL_ARCH_CPPFLAGS)
+CFLAGS:=$(CFLAGS) -ffreestanding -D__is_kernel -Iinclude $(WARNINGS) $(KERNEL_ARCH_CFLAGS)
+CPPFLAGS:=$(CPPFLAGS) $(KERNEL_ARCH_CPPFLAGS)
 LDFLAGS:=$(LDFLAGS) $(KERNEL_ARCH_LDFLAGS)
 LIBS:=$(LIBS) -nostdlib -lk -lgcc $(KERNEL_ARCH_LIBS)
 
@@ -31,50 +34,55 @@ KERNFILE?=Flux.bin
 #Backup for linker, should be set in arch .config file
 LINKER?=linker.ld
 
-C_OBJS:=$(shell find kernel -name *.c)
-CPP_OBJS:=$(shell find kernel -name *.cpp)
+C_OBJS:=$(shell find . -path ./include -prune -o -path ./arch -prune -o -name *.c -print)
+CPP_OBJS:=$(shell find . -path ./include -prune -o -path ./arch -prune -o -name *.cpp -print)
 KERNEL_OBJS:=$(C_OBJS:.c=.o) $(CPP_OBJS:.cpp=.o) $(KERNEL_ARCH_OBJS)
 
-OBJS=\
-$(ARCHDIR)/crti.o \
-$(ARCHDIR)/crtbegin.o \
-$(KERNEL_OBJS) \
+SUFFIX_ENTRIES?=\
 $(ARCHDIR)/crtend.o \
 $(ARCHDIR)/crtn.o \
+
+PREFIX_ENTRIES?=\
+$(ARCHDIR)/crti.o \
+$(ARCHDIR)/crtbegin.o \
+
+OBJS=\
+$(PREFIX_ENTRIES) \
+$(KERNEL_OBJS) \
+$(SUFFIX_ENTRIES) \
 
 LINK_LIST=\
 $(LDFLAGS) \
-$(ARCHDIR)/crti.o \
-$(ARCHDIR)/crtbegin.o \
+$(PREFIX_ENTRIES) \
 $(KERNEL_OBJS) \
 $(LIBS) \
-$(ARCHDIR)/crtend.o \
-$(ARCHDIR)/crtn.o \
+$(SUFFIX_ENTRIES) \
 
 .PHONY: all clean install install-headers install-binairies
-.SUFFIXES: .o .c .cpp .S
 
-all: $(KERNFILE)
+all: $(OBJS) $(ARCHDIR)/$(LINKER)
 
-$(KERNFILE): $(OBJS) $(ARCHDIR)/$(LINKER)
+$(KERNFILE): $(OBJS) $(ARCHDIR)/$(LINKER) $(LIBK)
+	@mkdir -p $(DESTDIR)$(BOOTDIR)
 	$(CC) -T $(ARCHDIR)/$(LINKER) -o $@ $(CFLAGS) $(LINK_LIST)
 
 $(ARCHDIR)/crtbegin.o $(ARCHDIR)/crtend.o:
 	@OBJ=`$(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=$(@F)` && cp "$$OBJ" $@
 
-.c.o:
-	$(CC) -MD -c $< -o $@ $(CFLAGS) $(CPPFLAGS) -std=gnu11
+%.o: %.c
+	$(CC) -MD -c $< -o $@ $(CFLAGS) -std=gnu11
 
-.cpp.o:
+%.o: %.cpp
 	$(CC) -MD -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
 
-.S.o:
-	$(CC) -MD -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
+%.o: %.S
+	$(CC) -MD -c $< -o $@ $(CFLAGS)
+	
+FORCE:
 
 clean:
-	@rm -f $(KERNFILE)
-	@rm -f $(OBJS) *.o */*.o */*/*.o
-	@rm -f $(OBJS:.o=.d) *.d */*.d */*/*.d
+	@rm -f $(OBJS)
+	@rm -f $(OBJS:.o=.d)
 
 install: install-headers install-binairies
 
@@ -84,8 +92,6 @@ install-headers:
 	@cp -R --preserve=timestamps include/. $(DESTDIR)$(INCLUDEDIR)/.
 
 install-binairies: $(KERNFILE)
-	@echo 'Install sys'
-	@mkdir -p $(DESTDIR)$(BOOTDIR)
-	@cp $(KERNFILE) $(DESTDIR)$(BOOTDIR)
+	@echo 'Installed kernel'
 
 -include $(OBJS:.o=.d)

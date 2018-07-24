@@ -12,4 +12,5 @@ else
     HOSTARCH=$?
 fi
 
-qemu-system-$HOSTARCH -s -S -kernel system/$KERNFILE
+echo $HOSTARCH
+qemu-system-$HOSTARCH -kernel sysroot/$KERNFILE

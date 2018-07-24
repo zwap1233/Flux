@@ -1,11 +1,12 @@
-#include <kernel.h>
+#include <core/kernel.h>
 
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 
-#include <kernel/io/vga.h>
-#include <kernel/memory/paging.h>
+#include <core/vga.h>
+#include <MemoryManager/paging.h>
+#include <UnitTesting/test_cases.h>
 
 extern uint32_t ld_kernel_start;
 extern uint32_t ld_kernel_end;
@@ -27,6 +28,8 @@ void earlyKernel(void){
  */
 void mainKernel(void) {
 	vga_init(&ld_kernel_start, &ld_kernel_end);
+
+	run_cases();
 	//printf("Hello, kernel World!\n");
 }
 

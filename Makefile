@@ -1,4 +1,4 @@
-export PROJECTS:=libk system
+export PROJECTS:=libk kernel
 
 install-arm: HOST=arm-none-eabi
 install-i686: HOST=i686-elf
@@ -13,9 +13,12 @@ export AR=$(HOST)-ar
 export AS=$(HOST)-as
 export CC=$(HOST)-gcc
 
-export PREFIX=/usr
-export BOOTDIR=/boot
-export LIBDIR:=$(PREFIX)/lib
+export SYSROOT:=$(shell pwd)/sysroot
+export DESTDIR=$(SYSROOT)
+
+export PREFIX:=
+export BOOTDIR:=
+export LIBDIR:=/lib
 export INCLUDEDIR:=$(PREFIX)/include
 
 export CFLAGS:=-O0 -g -fstack-protector-all
@@ -30,12 +33,7 @@ export CFLAGS:=-isystem=$(INCLUDEDIR) $(CFLAGS)
 
 #inbuild vars
 OSNAME=Flux
-export KERNFILE:=$(OSNAME).bin
-export ISOFILE:=$(OSNAME).iso
-ISODIR=isodir
-
-export SYSROOT:=$(shell pwd)/sysroot
-export DESTDIR=$(SYSROOT)
+export KERNFILE:=$(DESTDIR)$(BOOTDIR)/$(OSNAME).bin
 
 .PHONEY: all install clean install-arm install-i686
 
@@ -45,7 +43,7 @@ install: sysroot
 	@for p in $(PROJECTS); do cd ./$$p; $(MAKE) install-headers; cd ..; done
 	@for p in $(PROJECTS); do cd ./$$p; $(MAKE) install-binairies; cd ..; done
 	
-	@grub-file --is-x86-multiboot system/$(KERNFILE); \
+	@grub-file --is-x86-multiboot $(KERNFILE); \
 	if [ "$$?" -eq "1" ] ; then \
 		echo 'ERROR: Kernel file is not multiboot'; \
 	fi;
@@ -63,5 +61,3 @@ clean:
 	@for p in $(PROJECTS); do cd ./$$p; $(MAKE) clean; cd ..; done
 	
 	@rm -rf $(SYSROOT) && echo 'Removed: $(SYSROOT)'
-	@rm -rf $(ISODIR) && echo 'Removed: $(ISODIR)'
-	@rm -rf $(ISOFILE) && echo 'Removed: $(ISOFILE)'
