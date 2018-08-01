@@ -14,6 +14,11 @@
 .long FLAGS
 .long CHECKSUM
 
+
+.section .bss
+.global boot_info_p
+boot_info_p: .long
+
 # Reserve a stack for the initial thread.
 .section .bss_stack, "aw", @nobits
 .align 16
@@ -27,6 +32,10 @@ stack_top:
 .global _paging_return
 .type _start, @function
 _start:
+
+	#store boot info
+	addl 0xC0000000, %ebx
+	movl %ebx, MEM_INFO_P - 0xC0000000
 
 	#setup paging
 	lea _paging_init - 0xC0000000, %ecx

@@ -13,4 +13,4 @@ else
 fi
 
 echo $HOSTARCH
-qemu-system-$HOSTARCH -kernel sysroot/$KERNFILE
+qemu-system-$HOSTARCH -kernel sysroot/boot/$KERNFILE
