@@ -15,8 +15,8 @@
 		
 	<Task Description="Improve printf function for broader use and debug functionality" Progress="100%" Priority="1"></Task>
 	<Task Description="Construct stack smash protector" Progress="100%" Priority="0" Detail="Check implementation, is it done correctly?"></Task>
-	<Task Description="Add c++ support" Progress="95%" Priority="1"
-		Detail="Needs a stdlib implementation for rtti (Run-Time Type Information) and exceptions">
+	<Task Description="Add c++ support" Progress="0%" Priority="0"
+		Detail="Switched kernel to c, for process c++ support needs to be reasearched">
 	</Task>
 
 	<Task Description="Add ARM Support" Progress="0%" Priority="0">
