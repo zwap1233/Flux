@@ -1,19 +1,26 @@
 # Declare constants for the multiboot header.
-.set ALIGN,    1<<0             # align loaded modules on page boundaries
-.set MEMINFO,  1<<1             # provide memory map
-.set FLAGS,    ALIGN | MEMINFO  # this is the Multiboot 'flag' field
-.set MAGIC,    0x1BADB002       # 'magic number' lets bootloader find the header
-.set CHECKSUM, -(MAGIC + FLAGS) # checksum of above, to prove we are multiboot
+.set MAGIC,		0xE85250D6					# 'magic number' lets bootloader find the header
+.set ARCH,		0							# The device architecture 0 for i386 protected mode
+.set HEADLEN,	16							# this is the Multiboot 'flag' field
+.set CHECKSUM,	-(MAGIC + ARCH + HEADLEN)	# checksum of above, to prove we are multiboot
+
+.set TAG_END_TYPE,	0						#End Tag of size 8 and type 0, flag is 0 so optional
+.set TAG_END_FLAGS,	0
+.set TAG_END_SIZE,	8
 
 .extern _paging_init
 
 # Declare a header as in the Multiboot Standard.
 .section .multiboot
-.align 4
+.align 8
 .long MAGIC
-.long FLAGS
+.long ARCH
+.long HEADLEN
 .long CHECKSUM
 
+.word TAG_END_TYPE
+.word TAG_END_FLAGS
+.long TAG_END_SIZE
 
 .section .bss
 .global boot_info_p
