@@ -35,7 +35,7 @@ _start:
 
 	#store boot info
 	addl 0xC0000000, %ebx
-	movl %ebx, MEM_INFO_P - 0xC0000000
+	movl %ebx, boot_info_p - 0xC0000000
 
 	#setup paging
 	lea _paging_init - 0xC0000000, %ecx

@@ -10,9 +10,8 @@ LIBS?=
 
 DESTDIR?=$(HOME)/sysroot
 PREFIX?=/usr
-SUFFIX?=
 BOOTDIR?=/boot
-INCLUDEDIR?=$(PREFIX)/include$(SUFFIX)
+INCLUDEDIR?=$(PREFIX)/include
 
 LIBK:=$(shell find $(DESTDIR) -name libk.a)
 

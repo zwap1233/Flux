@@ -10,9 +10,8 @@ LIBS?=
 
 DESTDIR?=$(HOME)/sysroot
 PREFIX?=/usr
-SUFFIX?=/libk
 LIBDIR?=$(PREFIX)/lib
-INCLUDEDIR?=$(PREFIX)/include$(SUFFIX)
+INCLUDEDIR?=$(PREFIX)/include
 
 ARCHDIR=arch/$(HOSTARCH)
 

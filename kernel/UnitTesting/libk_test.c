@@ -86,7 +86,7 @@ void memmove_test_case(){
 void memset_test_case(){
 	char *a = "String 1";
 
-	memset(a, a, 9);
+	memset(a, 0, 9);
 	if(memcmp(a, "String 1", 9)){printf("Error memset test case 1 fail\n");}
 }
 

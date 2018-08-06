@@ -2,7 +2,7 @@
 make
 
 HOST=i686-elf
-KERNFILE=Flux.bin
+ISOFILE=Flux.iso
 
 if echo $HOST | grep -Eq 'i[[:digit:]]86-'; then
     HOSTARCH=i386
@@ -12,5 +12,4 @@ else
     HOSTARCH=$?
 fi
 
-echo $HOSTARCH
-qemu-system-$HOSTARCH -kernel sysroot/boot/$KERNFILE
+qemu-system-$HOSTARCH --cdrom $ISOFILE

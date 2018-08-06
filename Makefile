@@ -21,7 +21,7 @@ export BOOTDIR:=/boot
 export LIBDIR:=/lib
 export INCLUDEDIR:=$(PREFIX)/include
 
-ISODIR:=iso
+GRUBDIR:=/grub
 GRUBCFG:=grub.cfg
 
 export CFLAGS:=-O0 -g -fstack-protector-all
@@ -37,6 +37,7 @@ export CFLAGS:=-isystem=$(INCLUDEDIR) $(CFLAGS)
 #inbuild vars
 OSNAME=Flux
 export KERNFILE:=$(DESTDIR)$(BOOTDIR)/$(OSNAME).bin
+ISOFILE:=$(OSNAME).iso
 
 .PHONEY: all install clean install-arm install-i686 install-iso
 
@@ -50,6 +51,10 @@ install: sysroot
 	if [ "$$?" -eq "1" ] ; then \
 		echo 'ERROR: Kernel file is not multiboot compatible'; \
 	fi;
+	
+	@mkdir -p $(DESTDIR)$(BOOTDIR)$(GRUBDIR)
+	@cp $(GRUBCFG) $(DESTDIR)$(BOOTDIR)$(GRUBDIR)
+	@grub-mkrescue -o $(ISOFILE) $(DESTDIR)
 	
 sysroot:
 	@mkdir $(SYSROOT)
@@ -70,3 +75,4 @@ clean:
 	@for p in $(PROJECTS); do cd ./$$p; $(MAKE) clean; cd ..; done
 	
 	@rm -rf $(SYSROOT) && echo 'Removed: $(SYSROOT)'
+	@rm -rf $(ISOFILE) && echo 'Removed: $(ISOFILE)'
