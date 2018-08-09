@@ -8,7 +8,9 @@
 #ifndef KERNEL_INCLUDE_CORE_DESCRIPTOR_TABLES_H_
 #define KERNEL_INCLUDE_CORE_DESCRIPTOR_TABLES_H_
 
-typedef unsigned long int GDT_t;
+typedef struct {
+	uint8_t byte[4];
+} GDT_t;
 
 void setupGDT();
 

@@ -39,11 +39,9 @@ OSNAME=Flux
 export KERNFILE:=$(DESTDIR)$(BOOTDIR)/$(OSNAME).bin
 ISOFILE:=$(OSNAME).iso
 
-.PHONEY: all install clean install-arm install-i686 install-iso
+.PHONEY: all install clean install-arm install-i686
 
-all: install
-
-install: sysroot
+all: sysroot
 	@for p in $(PROJECTS); do cd ./$$p; $(MAKE) install-headers; cd ..; done
 	@for p in $(PROJECTS); do cd ./$$p; $(MAKE) install-binairies; cd ..; done
 	
@@ -52,6 +50,7 @@ install: sysroot
 		echo 'ERROR: Kernel file is not multiboot compatible'; \
 	fi;
 	
+install: all
 	@mkdir -p $(DESTDIR)$(BOOTDIR)$(GRUBDIR)
 	@cp $(GRUBCFG) $(DESTDIR)$(BOOTDIR)$(GRUBDIR)
 	@grub-mkrescue -o $(ISOFILE) $(DESTDIR)
@@ -64,12 +63,6 @@ install-arm: install
 
 install-i686: HOST=i686-elf
 install-i686: install
-
-install-iso: install
-	@mkdir $(ISODIR)/boot/grub
-	@cp $(GRUBCFG) $(ISODIR)/boot/grub
-	@cp $(KERNFILE) $(ISODIR)
-	@grub-mkrescue -o $(OSNAME).iso $(ISODIR)
 
 clean:
 	@for p in $(PROJECTS); do cd ./$$p; $(MAKE) clean; cd ..; done
